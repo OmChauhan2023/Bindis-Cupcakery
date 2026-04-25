@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Box, Typography, Button, Container, alpha, useTheme } from "@mui/material";
+import { WhatsApp as WhatsAppIcon } from "@mui/icons-material";
 
 const images = [
   "/bakery_1.jpg",
@@ -12,56 +14,120 @@ const images = [
 ];
 
 export default function HeroSection() {
+  const theme = useTheme();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <Box component="section" sx={{ relative: "relative", height: "100vh", overflow: "hidden" }}>
       {/* Background Image Carousel */}
       {images.map((src, index) => (
-        <div
+        <Box
           key={src}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentImageIndex ? "opacity-100" : "opacity-0"
-          }`}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            transition: "opacity 1s ease-in-out",
+            opacity: index === currentImageIndex ? 1 : 0,
+          }}
         >
           <Image
             src={src}
             alt={`Bakery Background ${index + 1}`}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: "cover" }}
             priority={index === 0}
           />
-        </div>
+        </Box>
       ))}
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50" />
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          bgcolor: alpha("#000", 0.5),
+        }}
+      />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
-        <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 mb-6 animate-fadeIn">
+      <Container
+        maxWidth="md"
+        sx={{
+          position: "relative",
+          zIndex: 10,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          color: "white",
+        }}
+      >
+        <Typography
+          variant="h2"
+          component="h1"
+          sx={{
+            fontWeight: 800,
+            background: "linear-gradient(45deg, #fbbf24 30%, #ef4444 60%, #ec4899 90%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            mb: 2,
+            fontSize: { xs: "2.5rem", md: "4rem" },
+            animation: "fadeIn 1s ease-out",
+            "@keyframes fadeIn": {
+              from: { opacity: 0 },
+              to: { opacity: 1 },
+            },
+          }}
+        >
           Eggless, Homemade & Delicious!
-        </h1>
-        <p className="mt-3 text-xl md:text-2xl text-pink-300 mb-8 animate-slideUp">
+        </Typography>
+        <Typography
+          variant="h5"
+          sx={{
+            color: "primary.light",
+            mb: 4,
+            fontWeight: 500,
+            animation: "slideUp 1s ease-out",
+            "@keyframes slideUp": {
+              from: { transform: "translateY(20px)", opacity: 0 },
+              to: { transform: "translateY(0)", opacity: 1 },
+            },
+          }}
+        >
           Freshly baked cupcakes, brownies, and ice creams made with love ❤️
-        </p>
+        </Typography>
 
-        {/* Updated WhatsApp Button */}
-        <a
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<WhatsAppIcon />}
           href="https://wa.me/918849130189"
-          className="bg-green-600 text-white text-lg font-semibold px-6 py-3 rounded-md hover:bg-green-700 transition-all duration-300"
+          sx={{
+            bgcolor: "#25d366", // WhatsApp Green
+            px: 4,
+            py: 1.5,
+            fontSize: "1.1rem",
+            fontWeight: 600,
+            "&:hover": {
+              bgcolor: "#128c7e",
+            },
+            borderRadius: "50px",
+            boxShadow: "0 4px 14px 0 rgba(37, 211, 102, 0.39)",
+          }}
         >
           Order on WhatsApp
-        </a>
-      </div>
-    </section>
+        </Button>
+      </Container>
+    </Box>
   );
 }

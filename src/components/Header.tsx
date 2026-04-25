@@ -3,9 +3,56 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, ShoppingCart, X } from "lucide-react"
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  InputBase,
+  Badge,
+  Box,
+  Container,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Fade,
+  useTheme,
+  alpha
+} from "@mui/material"
+import {
+  Search as SearchIcon,
+  ShoppingCart as ShoppingCartIcon,
+  Close as CloseIcon,
+  Search
+} from "@mui/icons-material"
+import { styled } from "@mui/material/styles"
+
+const SearchOverlay = styled("div")(({ theme }) => ({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+  display: "flex",
+  alignItems: "center",
+  zIndex: 100,
+}))
+
+const SearchInput = styled(InputBase)(({ theme }) => ({
+  width: "100%",
+  fontSize: "1.5rem",
+  padding: theme.spacing(2),
+  borderBottom: `2px solid ${theme.palette.divider}`,
+  "&:focus-within": {
+    borderBottomColor: theme.palette.primary.main,
+  },
+}))
 
 export default function Header() {
+  const theme = useTheme()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
@@ -17,7 +64,7 @@ export default function Header() {
       try {
         const response = await fetch("/api/products")
         const data = await response.json()
-        setAllProducts(data.products)
+        setAllProducts(data.products || [])
       } catch (error) {
         console.error("Error fetching products:", error)
       }
@@ -31,7 +78,9 @@ export default function Header() {
       return
     }
 
-    const results = allProducts.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    const results = allProducts.filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
     setFilteredProducts(results)
   }, [searchQuery, allProducts])
@@ -50,100 +99,119 @@ export default function Header() {
     }
   }
 
+  const navLinks = [
+    { title: "Home", path: "/" },
+    { title: "Products", path: "/products" },
+    { title: "Gallery", path: "/gallery" },
+    { title: "Contact", path: "/contact" },
+    { title: "Review", path: "/review" },
+    { title: "Admin", path: "/admin", bold: true },
+  ]
+
   return (
-    <header className="bg-pink-100 shadow-md relative z-50">
-      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image src="/bindis_logo.jpg" alt="Bindi's Cupcakery Logo" width={150} height={50} priority />
-        </Link>
+    <AppBar position="sticky" color="inherit" elevation={1} sx={{ bgcolor: "background.paper" }}>
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ justifyContent: "space-between", height: 80 }}>
+          {/* Logo */}
+          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+            <Image src="/bindis_logo.jpg" alt="Bindi's Cupcakery Logo" width={140} height={50} priority />
+          </Link>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex space-x-4">
-          <Link href="/" className="text-gray-800 hover:text-pink-600">
-            Home
-          </Link>
-          <Link href="/products" className="text-gray-800 hover:text-pink-600">
-            Products
-          </Link>
-          <Link href="/gallery" className="text-gray-800 hover:text-pink-600">
-            Gallery
-          </Link>
-          <Link href="/contact" className="text-gray-800 hover:text-pink-600">
-            Contact
-          </Link>
-          <Link href="/review" className="text-gray-800 hover:text-pink-600">
-            Review
-          </Link>
-        </nav>
-
-        {/* Right-side icons: Search & Cart */}
-        <div className="flex items-center space-x-4">
-          {/* Search Button */}
-          <button
-            onClick={toggleSearch}
-            aria-label="Search"
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition duration-300"
-          >
-            <Search className="h-6 w-6 text-gray-700 transition-transform duration-300 hover:scale-110" />
-          </button>
-
-          {/* Shopping Cart */}
-          <div className="relative">
-            <Link href="/cart">
-              <button
-                aria-label="Shopping Cart"
-                className="relative flex items-center justify-center p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all shadow-md"
+          {/* Navigation Links */}
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
+            {navLinks.map((link) => (
+              <Button
+                key={link.title}
+                component={Link}
+                href={link.path}
+                color="inherit"
+                sx={{
+                  fontWeight: link.bold ? 700 : 400,
+                  "&:hover": { color: "primary.main" },
+                }}
               >
-                <ShoppingCart className="h-6 w-6 text-gray-700" />
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
+                {link.title}
+              </Button>
+            ))}
+          </Box>
 
-      {/* Full-width Search Overlay */}
-      <div
-        className={`absolute top-0 left-0 w-full h-full bg-white bg-opacity-95 transition-all duration-300 ease-in-out ${
-          isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-      >
-        <div className="container mx-auto px-6 py-4 flex items-center h-full">
-          <div className="w-full max-w-3xl mx-auto relative">
-            <input
-              ref={searchInputRef}
-              type="search"
-              placeholder="Search for delicious treats..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-4 text-xl text-gray-700 bg-transparent border-b-2 border-gray-300 focus:outline-none focus:border-pink-500 transition-all"
-            />
-            <button
+          {/* Icons */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton
               onClick={toggleSearch}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2"
-              aria-label="Close search"
+              color="inherit"
+              sx={{
+                bgcolor: alpha(theme.palette.text.primary, 0.05),
+                "&:hover": { bgcolor: alpha(theme.palette.text.primary, 0.1) },
+              }}
             >
-              <X className="h-6 w-6 text-gray-500 hover:text-gray-700" />
-            </button>
-          </div>
-        </div>
+              <SearchIcon />
+            </IconButton>
 
-        {/* Search Results */}
-        {filteredProducts.length > 0 && (
-          <div className="container mx-auto px-6 mt-4">
-            <ul className="bg-white rounded-lg shadow-lg max-h-96 overflow-auto">
-              {filteredProducts.map((product) => (
-                <li key={product._id} className="border-b border-gray-200 last:border-b-0">
-                  <Link href={`/products/${product._id}`} onClick={toggleSearch}>
-                    <span className="block p-4 hover:bg-pink-50 transition-colors">{product.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </header>
+            <IconButton
+              component={Link}
+              href="/cart"
+              color="inherit"
+              sx={{
+                bgcolor: alpha(theme.palette.text.primary, 0.05),
+                "&:hover": { bgcolor: alpha(theme.palette.text.primary, 0.1) },
+              }}
+            >
+              <Badge badgeContent={0} color="primary">
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </Container>
+
+      {/* Search Overlay */}
+      <Fade in={isSearchOpen} unmountOnExit>
+        <SearchOverlay>
+          <Container maxWidth="md">
+            <Box sx={{ position: "relative" }}>
+              <SearchInput
+                inputRef={searchInputRef}
+                placeholder="Search for delicious treats..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <IconButton
+                onClick={toggleSearch}
+                sx={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            {/* Results */}
+            {filteredProducts.length > 0 && (
+              <Paper elevation={4} sx={{ mt: 2, maxHeight: 400, overflow: "auto", borderRadius: 2 }}>
+                <List>
+                  {filteredProducts.map((product) => (
+                    <ListItem
+                      key={product.id || product._id}
+                      component={Link}
+                      href={`/products/${product.id || product._id}`}
+                      onClick={toggleSearch}
+                      disablePadding
+                    >
+                      <ListItemText
+                        primary={product.name}
+                        sx={{
+                          px: 2,
+                          py: 1,
+                          "&:hover": { bgcolor: "primary.light", color: "primary.dark" },
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Paper>
+            )}
+          </Container>
+        </SearchOverlay>
+      </Fade>
+    </AppBar>
   )
-}
-
+}

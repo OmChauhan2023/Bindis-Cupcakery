@@ -6,6 +6,7 @@ if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable");
 }
 
+// Global caching to prevent multiple database connections
 let cached = (global as any).mongoose || { conn: null, promise: null };
 
 export async function connectDB() {
@@ -20,6 +21,13 @@ export async function connectDB() {
       .then((mongoose) => mongoose);
   }
 
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+    console.log("✅ MongoDB Connected");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    throw new Error("Database connection failed");
+  }
+
   return cached.conn;
 }

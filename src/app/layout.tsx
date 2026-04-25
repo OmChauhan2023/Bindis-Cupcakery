@@ -2,10 +2,17 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import Header from "../components/Header";
 import { Footer } from "../components/Footer";
-import { CartProvider } from "./cart/CartContext"; // Import CartProvider
-import WhatsAppFloat from "@/components/whatsapp-float"; // Import WhatsApp Float
+import { CartProvider } from "./cart/components/CartContext";
+import WhatsAppFloat from "@/components/whatsapp-float";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import theme from "@/theme";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata = {
   title: "Bindi's Cupcakery",
@@ -15,13 +22,18 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <CartProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <WhatsAppFloat /> {/* Ensure WhatsApp Floating Icon is always visible */}
-        </CartProvider>
+      <body className={`${inter.variable} ${inter.className} flex flex-col min-h-screen`}>
+        <AppRouterCacheProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <WhatsAppFloat />
+            </CartProvider>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );

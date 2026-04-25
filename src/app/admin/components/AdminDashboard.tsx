@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import { useEffect, useState } from "react";
 import { Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -110,24 +111,24 @@ export default function AdminDashboard() {
         <Table>
           <TableHeader>
             <TableRow>
-            <TableHead>Image</TableHead>
+              <TableHead>Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Actions</TableHead>
-
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.map((product) => (
               <TableRow key={product._id}>
-                <TableCell><img
-                                src={product.image}
-                                height={50}
-                                width={50}
-                                alt="image"
-                                className="w-full h-24 object-cover rounded-md">
-                </img>
+                <TableCell>
+                  <Image
+                    src={product.image}
+                    height={50}
+                    width={50}
+                    alt={product.name}
+                    className="w-full h-24 object-cover rounded-md"
+                  />
                 </TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.description}</TableCell>

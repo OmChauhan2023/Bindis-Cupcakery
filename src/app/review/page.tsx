@@ -1,30 +1,58 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Star } from "lucide-react"
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Grid,
+  Avatar,
+  alpha,
+  Alert,
+  Collapse,
+} from "@mui/material"
+import { Star as StarIcon, StarBorder as StarBorderIcon, Send as SendIcon } from "@mui/icons-material"
 
 const initialReviews = [
-  { id: 1, name: "Hrithik", rating: 5, comment: "The cupcakes were absolutely delicious! Will definitely order again.", bgColor: "bg-pink-100" },
-  { id: 2, name: "Abhishek", rating: 4, comment: "Great variety of flavors. The ice cream was a hit at our party.", bgColor: "bg-purple-100" },
-  { id: 3, name: "Kshitij", rating: 5, comment: "The best eggless cakes I've ever had. Highly recommended!", bgColor: "bg-rose-100" },
-  { id: 4, name: "Akshat", rating: 5, comment: "Ordered a custom cake for my daughter's birthday. It was perfect!", bgColor: "bg-yellow-100" },
-  { id: 5, name: "Jaimin", rating: 5, comment: "Their service and quality is the best, and they maintain very good hygiene.", bgColor: "bg-blue-100" },
+  { id: 1, name: "Hrithik", rating: 5, comment: "The cupcakes were absolutely delicious! Will definitely order again." },
+  { id: 2, name: "Abhishek", rating: 4, comment: "Great variety of flavors. The ice cream was a hit at our party." },
+  { id: 3, name: "Kshitij", rating: 5, comment: "The best eggless cakes I've ever had. Highly recommended!" },
+  { id: 4, name: "Akshat", rating: 5, comment: "Ordered a custom cake for my daughter's birthday. It was perfect!" },
+  { id: 5, name: "Jaimin", rating: 5, comment: "Their service and quality is the best, and they maintain very good hygiene." },
 ]
 
-function Rating({ rating, setRating }: { rating: number, setRating?: (value: number) => void }) {
+const avatarColors = [
+  "linear-gradient(135deg, #ec4899, #f472b6)",
+  "linear-gradient(135deg, #8b5cf6, #a78bfa)",
+  "linear-gradient(135deg, #f59e0b, #fbbf24)",
+  "linear-gradient(135deg, #3b82f6, #60a5fa)",
+  "linear-gradient(135deg, #10b981, #34d399)",
+]
+
+function StarRating({ rating, setRating }: { rating: number; setRating?: (v: number) => void }) {
+  const [hovered, setHovered] = useState(0)
+
   return (
-    <div className="flex gap-1">
-      {[...Array(5)].map((_, i) => (
-        <motion.div
+    <Box sx={{ display: "flex", gap: 0.5 }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Box
           key={i}
-          className={`relative w-6 h-6 cursor-pointer transition-all duration-300 ${i < rating ? "text-yellow-400" : "text-gray-300"}`}
-          onClick={() => setRating && setRating(i + 1)} // **Now sets the rating!**
-          whileHover={{ scale: 1.2 }}
+          onClick={() => setRating && setRating(i)}
+          onMouseEnter={() => setRating && setHovered(i)}
+          onMouseLeave={() => setRating && setHovered(0)}
+          sx={{ cursor: setRating ? "pointer" : "default", transition: "transform 0.15s", "&:hover": { transform: setRating ? "scale(1.2)" : "none" } }}
         >
-          <Star className="w-full h-full" />
-        </motion.div>
+          {i <= (hovered || rating) ? (
+            <StarIcon sx={{ color: "#fbbf24", fontSize: setRating ? 32 : 20 }} />
+          ) : (
+            <StarBorderIcon sx={{ color: "#d1d5db", fontSize: setRating ? 32 : 20 }} />
+          )}
+        </Box>
       ))}
-    </div>
+    </Box>
   )
 }
 
@@ -34,112 +62,187 @@ export default function Reviews() {
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState("")
   const [error, setError] = useState("")
-  const [submitted, setSubmitted] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = () => {
     if (!name.trim() || !comment.trim() || rating === 0) {
       setError("Please fill out all fields and select a rating.")
       return
     }
-
-    setReviews([{ id: Date.now(), name, rating, comment, bgColor: "bg-gray-100" }, ...reviews])
-
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 2000) // Show success animation briefly
-
+    setReviews([{ id: Date.now(), name, rating, comment }, ...reviews])
+    setSuccess(true)
     setName("")
     setRating(0)
     setComment("")
     setError("")
+    setTimeout(() => setSuccess(false), 3000)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-200 to-rose-100 text-gray-900 px-6 py-12">
-      <motion.h1 
-        className="text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        Customer Reviews
-      </motion.h1>
-
-      {/* Feedback Form */}
-      <motion.div 
-        className="mb-12 max-w-2xl mx-auto bg-white/70 backdrop-blur-md shadow-lg rounded-xl p-8 border border-pink-300"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">We Value Your Feedback</h2>
-        <p className="text-gray-500 mb-6">Your feedback helps us improve! Share your experience with us.</p>
-
-        <input 
-          type="text" 
-          placeholder="Your Name" 
-          value={name} 
-          onChange={(e) => setName(e.target.value)} 
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg bg-gray-100 focus:border-pink-500 focus:ring focus:ring-pink-300 transition"
-        />
-
-        <textarea 
-          placeholder="Share your thoughts..." 
-          value={comment} 
-          onChange={(e) => setComment(e.target.value)} 
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg bg-gray-100 focus:border-pink-500 focus:ring focus:ring-pink-300 transition"
-          rows={4}
-        />
-
-        <div className="mb-5 flex items-center gap-3">
-          <span className="text-gray-700 font-medium">Rating:</span>
-          <Rating rating={rating} setRating={setRating} />
-        </div>
-
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-
-        <motion.button 
-          onClick={handleSubmit} 
-          className="w-full p-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition flex items-center justify-center"
-          whileTap={{ scale: 0.95 }}
-          animate={submitted ? { scale: 1.1, backgroundColor: "#4CAF50" } : {}}
-        >
-          {submitted ? "✓ Feedback Submitted!" : "Submit Review"}
-        </motion.button>
-      </motion.div>
-
-      {/* Reviews List */}
-      <div className="grid gap-8 md:grid-cols-2">
-        {reviews.map((review, index) => (
-          <motion.div
-            key={review.id}
-            className={`rounded-xl shadow-md p-6 border border-pink-200 transition-all ${review.bgColor}`}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ scale: 1.03, boxShadow: "0px 4px 20px rgba(255, 0, 122, 0.2)" }}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(160deg, #fce7f3 0%, #fff 40%, #f5f3ff 100%)",
+        pt: 8,
+        pb: 12,
+      }}
+    >
+      <Container maxWidth="lg">
+        {/* Header */}
+        <Box textAlign="center" mb={8}>
+          <Typography variant="overline" sx={{ color: "primary.main", letterSpacing: 4, fontWeight: 700 }}>
+            our community
+          </Typography>
+          <Typography
+            variant="h2"
+            fontWeight={800}
+            sx={{
+              background: "linear-gradient(135deg, #be185d, #7c3aed)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mt: 1,
+            }}
           >
-            <div className="flex items-center mb-3">
-              <motion.h2 
-                className="text-xl font-semibold text-gray-900 mr-3"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                {review.name}
-              </motion.h2>
-              <Rating rating={review.rating} />
-            </div>
-            <motion.p 
-              className="text-gray-700 italic"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+            Customer Reviews ⭐
+          </Typography>
+        </Box>
+
+        <Grid container spacing={5}>
+          {/* Submit Form */}
+          <Grid item xs={12} md={4}>
+            <Paper
+              elevation={0}
+              sx={{
+                borderRadius: 5,
+                p: 4,
+                border: "1px solid",
+                borderColor: alpha("#ec4899", 0.2),
+                background: "white",
+                position: "sticky",
+                top: 100,
+              }}
             >
-              "{review.comment}"
-            </motion.p>
-          </motion.div>
-        ))}
-      </div>
-    </div>
+              <Typography variant="h6" fontWeight={700} mb={0.5}>Leave a Review</Typography>
+              <Typography variant="body2" color="text.secondary" mb={3}>
+                We value your feedback!
+              </Typography>
+
+              <Collapse in={success}>
+                <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                  ✨ Thank you for your review!
+                </Alert>
+              </Collapse>
+
+              <TextField
+                fullWidth
+                label="Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+              <TextField
+                fullWidth
+                label="Your Experience"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                multiline
+                rows={4}
+                sx={{ mb: 2.5, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="body2" fontWeight={600} color="text.secondary" mb={1}>
+                  Your Rating
+                </Typography>
+                <StarRating rating={rating} setRating={setRating} />
+              </Box>
+
+              {error && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
+              <Button
+                fullWidth
+                variant="contained"
+                size="large"
+                onClick={handleSubmit}
+                endIcon={<SendIcon />}
+                sx={{
+                  borderRadius: "50px",
+                  py: 1.5,
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+                  boxShadow: "0 6px 20px rgba(236,72,153,0.35)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.3s",
+                }}
+              >
+                Submit Review
+              </Button>
+            </Paper>
+          </Grid>
+
+          {/* Reviews List */}
+          <Grid item xs={12} md={8}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              {reviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.06, duration: 0.4 }}
+                >
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      borderRadius: 4,
+                      p: 4,
+                      border: "1px solid",
+                      borderColor: "divider",
+                      background: "white",
+                      transition: "all 0.3s",
+                      "&:hover": {
+                        boxShadow: "0 12px 40px rgba(236,72,153,0.12)",
+                        transform: "translateY(-3px)",
+                        borderColor: alpha("#ec4899", 0.25),
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2.5 }}>
+                      <Avatar
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          background: avatarColors[index % avatarColors.length],
+                          fontWeight: 700,
+                          fontSize: "1.2rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {review.name[0]}
+                      </Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+                          <Typography fontWeight={700}>{review.name}</Typography>
+                          <StarRating rating={review.rating} />
+                        </Box>
+                        <Typography variant="body1" color="text.secondary" lineHeight={1.8} fontStyle="italic">
+                          "{review.comment}"
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                </motion.div>
+              ))}
+            </Box>
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
   )
 }

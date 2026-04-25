@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import Product from "@/models/Product";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    await connectDB();
     const data = await req.json();
 
     // Check if the request contains an array (bulk insert) or a single object
@@ -13,8 +11,15 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: "No products to add" }, { status: 400 });
       }
       
-      const savedProducts = await Product.insertMany(data); // Bulk insert
-      return NextResponse.json({ message: "Products added successfully", products: savedProducts }, { status: 201 });
+      const savedProducts = await prisma.product.createMany({
+        data: data.map((item: any) => ({
+          name: item.name,
+          description: item.description,
+          price: parseFloat(item.price),
+          image: item.image,
+        })),
+      });
+      return NextResponse.json({ message: "Products added successfully", count: savedProducts.count }, { status: 201 });
     }
 
     // Single product insert
@@ -24,23 +29,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "All fields are required" }, { status: 400 });
     }
 
-    const newProduct = new Product({ name, description, price, image });
-    await newProduct.save();
+    const newProduct = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+        image,
+      },
+    });
 
     return NextResponse.json({ message: "Product added successfully", product: newProduct }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error adding product:", error);
-    return NextResponse.json({ message: "Error adding product", error }, { status: 500 });
+    return NextResponse.json({ message: "Error adding product", error: error.message }, { status: 500 });
   }
 }
 
 export async function GET() {
   try {
-    await connectDB();
-    const products = await Product.find({});
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     return NextResponse.json({ products }, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching products:", error);
-    return NextResponse.json({ message: "Error fetching products", error }, { status: 500 });
+    return NextResponse.json({ message: "Error fetching products", error: error.message }, { status: 500 });
   }
 }
