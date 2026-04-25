@@ -1,13 +1,6 @@
-<<<<<<< HEAD
 "use client";
 import Checkout from "../components/CheckOut";
-
-export default function CheckoutPage() {
-  return <Checkout />;
-=======
-"use client"
-import { useAuth } from "../../auth/AuthContext"; // ✅ Relative import (Recommended)
-
+import { useAuth } from "../../auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -17,10 +10,9 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!user) router.push("/auth/login");
-  }, [user]);
+  }, [user, router]);
 
   if (!user) return <p>Redirecting to login...</p>;
 
-  return <p>Proceed to checkout...</p>;
->>>>>>> a5952e490eec4534302ae02da739bc78b511b478
+  return <Checkout />;
 }
