@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Box, Typography, Button, Container, alpha, useTheme } from "@mui/material";
+import { Box, Typography, Button, Container, alpha } from "@mui/material";
 import { WhatsApp as WhatsAppIcon } from "@mui/icons-material";
 
 const images = [
@@ -14,7 +14,6 @@ const images = [
 ];
 
 export default function HeroSection() {
-  const theme = useTheme();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {

@@ -28,7 +28,7 @@ export default function UserForm() {
       } else {
         setMessage(data.message || "Failed to create user");
       }
-    } catch (error) {
+    } catch {
       setMessage("Something went wrong");
     }
   };

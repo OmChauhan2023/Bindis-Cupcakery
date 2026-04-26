@@ -6,7 +6,6 @@ import Image from "next/image"
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   InputBase,
@@ -24,8 +23,7 @@ import {
 import {
   Search as SearchIcon,
   ShoppingCart as ShoppingCartIcon,
-  Close as CloseIcon,
-  Search
+  Close as CloseIcon
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
 
@@ -51,12 +49,19 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
   },
 }))
 
+interface Product {
+  id?: number | string
+  _id?: string
+  name: string
+  [key: string]: unknown
+}
+
 export default function Header() {
   const theme = useTheme()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([])
-  const [allProducts, setAllProducts] = useState<any[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {

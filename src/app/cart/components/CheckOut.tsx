@@ -15,11 +15,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Stepper,
-  Step,
-  StepLabel,
-  Alert,
-  Chip,
+  
+  
+  
+  
+  
   alpha,
 } from "@mui/material";
 import {
@@ -44,6 +44,7 @@ const CheckoutPage = () => {
 
   const total = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
     if (errors[e.target.name]) {

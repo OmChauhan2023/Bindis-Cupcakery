@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-import { PrismaClient } from "../src/generated";
-
-const prisma = new PrismaClient();
+import prisma from "../src/lib/prisma";
 
 // MongoDB connection string from environment
 const MONGODB_URI =
@@ -59,10 +57,10 @@ async function migrateData() {
     for (const product of mongoProducts) {
       await prisma.product.create({
         data: {
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          image: product.image,
+          name: product.name || "",
+          description: product.description || "",
+          price: product.price || 0,
+          image: product.image || "",
           createdAt: product.createdAt || new Date(),
           updatedAt: product.updatedAt || new Date(),
         },
@@ -79,9 +77,9 @@ async function migrateData() {
       try {
         await prisma.user.create({
           data: {
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
+            name: user.name || "",
+            email: user.email || "",
+            phone: user.phone || "",
             createdAt: user.createdAt || new Date(),
           },
         });
@@ -106,8 +104,8 @@ async function migrateData() {
       try {
         await prisma.admin.create({
           data: {
-            username: admin.username,
-            password: admin.password,
+            username: admin.username || "",
+            password: admin.password || "",
             role: admin.role || "admin",
             createdAt: admin.createdAt || new Date(),
           },

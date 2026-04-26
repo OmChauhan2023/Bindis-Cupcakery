@@ -17,7 +17,7 @@ import {
   alpha,
   Divider,
   Grid,
-  Alert,
+  
 } from "@mui/material";
 import {
   ShoppingCart as CartIcon,
@@ -49,7 +49,7 @@ export default function ProductDetailPage() {
   const [wishlisted, setWishlisted] = useState(false);
   const [qty, setQty] = useState(1);
 
-  const cartItem = cart.find((item) => item.id === Number(id));
+  const cartItem = cart.find((item) => item.id === String(id));
   const cartQty = cartItem ? cartItem.qty : 0;
 
   useEffect(() => {
@@ -210,7 +210,7 @@ export default function ProductDetailPage() {
                   >
                     <IconButton
                       size="small"
-                      onClick={() => updateQuantity(product.id, Math.max(0, cartQty - 1))}
+                      onClick={() => updateQuantity(product.id.toString(), Math.max(0, cartQty - 1))}
                       sx={{ color: "primary.main", p: 0.5 }}
                     >
                       <RemoveIcon fontSize="small" />
@@ -220,7 +220,7 @@ export default function ProductDetailPage() {
                     </Typography>
                     <IconButton
                       size="small"
-                      onClick={() => updateQuantity(product.id, cartQty + 1)}
+                      onClick={() => updateQuantity(product.id.toString(), cartQty + 1)}
                       sx={{ color: "primary.main", p: 0.5 }}
                     >
                       <AddIcon fontSize="small" />
@@ -257,7 +257,7 @@ export default function ProductDetailPage() {
                     size="large"
                     startIcon={<CartIcon />}
                     onClick={() =>
-                      addToCart({ id: product.id, name: product.name, image: product.image, price: product.price, qty })
+                      addToCart({ id: product.id.toString(), name: product.name, image: product.image, price: product.price, qty })
                     }
                     sx={{
                       borderRadius: "50px",

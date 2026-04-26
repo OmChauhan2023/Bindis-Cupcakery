@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
-  Container,
+  
   Typography,
   TextField,
   Button,
@@ -90,7 +90,7 @@ export default function AdminLogin() {
             Admin Portal
           </Typography>
           <Typography color="text.secondary" variant="body2">
-            Bindi's Cupcakery — Internal Access Only
+            Bindi&apos;s Cupcakery — Internal Access Only
           </Typography>
         </Box>
 

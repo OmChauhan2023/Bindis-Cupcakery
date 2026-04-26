@@ -232,7 +232,7 @@ export default function Reviews() {
                           <StarRating rating={review.rating} />
                         </Box>
                         <Typography variant="body1" color="text.secondary" lineHeight={1.8} fontStyle="italic">
-                          "{review.comment}"
+                          &quot;{review.comment}&quot;
                         </Typography>
                       </Box>
                     </Box>

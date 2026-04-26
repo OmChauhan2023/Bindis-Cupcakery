@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link"
+
 import {
   Box,
   Container,
@@ -138,7 +138,7 @@ export function Footer() {
         {/* Footer Bottom */}
         <Box sx={{ mt: 6, pt: 3, borderTop: `1px solid ${theme.palette.divider}`, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
-            © {new Date().getFullYear()} Bindi's Cupcakery. All rights reserved.
+            © {new Date().getFullYear()} Bindi&apos;s Cupcakery. All rights reserved.
           </Typography>
         </Box>
       </Container>

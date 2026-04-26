@@ -11,10 +11,10 @@ import {
   Paper,
   Grid,
   Avatar,
-  Divider,
+  
   Chip,
   alpha,
-  IconButton,
+  
 } from "@mui/material";
 import {
   Inventory as ProductsIcon,
@@ -22,7 +22,7 @@ import {
   Receipt as OrdersIcon,
   Star as ReviewsIcon,
   Logout as LogoutIcon,
-  TrendingUp as TrendingIcon,
+  
   ArrowForward as ArrowIcon,
 } from "@mui/icons-material";
 
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                   Welcome back, Admin!
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                  Bindi's Cupcakery — Admin Dashboard
+                  Bindi&apos;s Cupcakery — Admin Dashboard
                 </Typography>
               </Box>
             </Box>

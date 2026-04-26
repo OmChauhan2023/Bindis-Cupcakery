@@ -5,11 +5,12 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
 
+    // Check if the request contains an array (bulk insert) or a single object
     if (Array.isArray(data)) {
       if (data.length === 0) {
         return NextResponse.json({ message: "No products to add" }, { status: 400 });
       }
-      
+
       const savedProducts = await prisma.product.createMany({
         data: data.map((item: any) => ({
           name: item.name,
@@ -21,7 +22,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Products added successfully", count: savedProducts.count }, { status: 201 });
     }
 
+    // Single product insert
     const { name, description, price, image } = data;
+
     if (!name || !description || !price || !image) {
       return NextResponse.json({ message: "All fields are required" }, { status: 400 });
     }

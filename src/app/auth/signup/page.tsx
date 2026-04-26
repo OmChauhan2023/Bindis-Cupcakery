@@ -13,7 +13,7 @@ export default function SignUpPage() {
     try {
       await signUp(email, password);
       router.push("/auth/login"); // Redirect to login after signup
-    } catch (error) {
+    } catch {
       alert("Signup failed. Try again.");
     }
   };

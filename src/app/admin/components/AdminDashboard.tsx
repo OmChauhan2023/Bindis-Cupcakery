@@ -30,7 +30,7 @@ export default function AdminDashboard() {
       const res = await fetch("/api/products");
       const data = await res.json();
       setProducts(data.products);
-    } catch (error) {
+    } catch {
       console.error("Error fetching products:", error);
     }
   };
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
       } else {
         setMessage(data.message || "Something went wrong");
       }
-    } catch (error) {
+    } catch {
       setMessage("Error processing request");
     }
   };
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       } else {
         setMessage("Failed to delete product");
       }
-    } catch (error) {
+    } catch {
       setMessage("Error deleting product");
     }
   };

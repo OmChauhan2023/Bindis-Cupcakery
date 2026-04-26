@@ -18,7 +18,6 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
   Remove as RemoveIcon,
-  ShoppingCartOutlined as CartIcon,
   ArrowForward as ArrowForwardIcon,
   ArrowBack as BackIcon,
 } from "@mui/icons-material";
@@ -44,7 +43,7 @@ const CartPage = () => {
           <Typography variant="h1" sx={{ fontSize: "5rem", mb: 2 }}>🛒</Typography>
           <Typography variant="h4" fontWeight={700} mb={1}>Your cart is empty!</Typography>
           <Typography color="text.secondary" mb={4}>
-            Looks like you haven't added any treats yet.
+            Looks like you haven&apos;t added any treats yet.
           </Typography>
           <Button
             component={Link}

@@ -13,7 +13,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push("/"); // Redirect to home
-    } catch (error) {
+    } catch {
       alert("Login failed. Please check your credentials.");
     }
   };
@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
       await googleSignIn();
       router.push("/");
-    } catch (error) {
+    } catch {
       alert("Google Login failed.");
     }
   };

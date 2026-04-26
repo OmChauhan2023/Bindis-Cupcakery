@@ -9,7 +9,7 @@ import {
   Typography,
   Grid,
   Card,
-  CardMedia,
+  
   CardContent,
   Button,
   Chip,
@@ -119,7 +119,7 @@ export default function Home() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Bindi's Cupcakery
+            Bindi&apos;s Cupcakery
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", lineHeight: 1.8 }}>
             Delicious, homemade, and preservative-free desserts crafted with love in every bite.
@@ -306,7 +306,7 @@ export default function Home() {
                   ))}
                 </Box>
                 <Typography variant="body1" color="text.secondary" lineHeight={1.8} mb={3} fontStyle="italic">
-                  "{text}"
+                  &quot;{text}&quot;
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Box

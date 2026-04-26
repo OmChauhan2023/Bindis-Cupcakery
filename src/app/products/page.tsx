@@ -190,181 +190,181 @@ export default function ProductPage() {
         <Grid container spacing={3}>
           {loading
             ? [...Array(8)].map((_, i) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
-                  <Skeleton variant="rounded" height={400} sx={{ borderRadius: 3 }} />
-                </Grid>
-              ))
+              <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+                <Skeleton variant="rounded" height={400} sx={{ borderRadius: 3 }} />
+              </Grid>
+            ))
             : products.map((product, index) => {
-                const imageUrl = product.image?.startsWith("/") ? product.image : `/${product.image}`
-                const isWishlisted = wishlist.has(product.id)
-                const isAdded = addedToCart.has(product.id)
+              const imageUrl = product.image?.startsWith("/") ? product.image : `/${product.image}`
+              const isWishlisted = wishlist.has(product.id)
+              const isAdded = addedToCart.has(product.id)
 
-                return (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 40 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.06, duration: 0.4 }}
+              return (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.06, duration: 0.4 }}
+                  >
+                    <Card
+                      sx={{
+                        borderRadius: 4,
+                        overflow: "hidden",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                        transition: "all 0.35s ease",
+                        "&:hover": {
+                          boxShadow: "0 20px 60px rgba(236,72,153,0.18)",
+                          transform: "translateY(-6px)",
+                          "& .product-img": { transform: "scale(1.08)" },
+                          "& .product-actions-overlay": { opacity: 1 },
+                        },
+                      }}
                     >
-                      <Card
-                        sx={{
-                          borderRadius: 4,
-                          overflow: "hidden",
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                          transition: "all 0.35s ease",
-                          "&:hover": {
-                            boxShadow: "0 20px 60px rgba(236,72,153,0.18)",
-                            transform: "translateY(-6px)",
-                            "& .product-img": { transform: "scale(1.08)" },
-                            "& .product-actions-overlay": { opacity: 1 },
-                          },
-                        }}
-                      >
-                        {/* Image */}
-                        <Box sx={{ position: "relative", height: 220, overflow: "hidden" }}>
-                          <Box className="product-img" sx={{ transition: "transform 0.5s ease", height: "100%", position: "relative" }}>
-                            <Image
-                              src={imageUrl || "/placeholder.svg"}
-                              alt={product.name}
-                              fill
-                              style={{ objectFit: "cover" }}
-                              priority={index < 4}
-                            />
-                          </Box>
-                          {/* Overlay actions */}
-                          <Box
-                            className="product-actions-overlay"
-                            sx={{
-                              position: "absolute",
-                              inset: 0,
-                              bgcolor: alpha("#000", 0.38),
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 1.5,
-                              opacity: 0,
-                              transition: "opacity 0.3s",
-                            }}
-                          >
-                            <Tooltip title="Add to Cart">
-                              <IconButton
-                                onClick={() => handleAddToCart(product)}
-                                sx={{ bgcolor: "white", color: "primary.main", "&:hover": { bgcolor: "primary.main", color: "white" } }}
-                              >
-                                <CartIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Customize">
-                              <IconButton
-                                onClick={() => openCustomizationModal(product.id)}
-                                sx={{ bgcolor: "white", color: "#8b5cf6", "&:hover": { bgcolor: "#8b5cf6", color: "white" } }}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                          {/* Wishlist */}
-                          <IconButton
-                            onClick={() => toggleWishlist(product.id)}
-                            sx={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              bgcolor: alpha("#fff", 0.9),
-                              backdropFilter: "blur(4px)",
-                              "&:hover": { bgcolor: "white" },
-                            }}
-                          >
-                            {isWishlisted ? (
-                              <HeartIcon sx={{ color: "primary.main", fontSize: 20 }} />
-                            ) : (
-                              <HeartBorderIcon sx={{ color: "text.secondary", fontSize: 20 }} />
-                            )}
-                          </IconButton>
+                      {/* Image */}
+                      <Box sx={{ position: "relative", height: 220, overflow: "hidden" }}>
+                        <Box className="product-img" sx={{ transition: "transform 0.5s ease", height: "100%", position: "relative" }}>
+                          <Image
+                            src={imageUrl || "/placeholder.svg"}
+                            alt={product.name}
+                            fill
+                            style={{ objectFit: "cover" }}
+                            priority={index < 4}
+                          />
                         </Box>
-
-                        <CardContent sx={{ px: 2.5, pt: 2, pb: 1 }}>
-                          <Link href={`/products/${product.id}`} style={{ textDecoration: "none" }}>
-                            <Typography
-                              variant="subtitle1"
-                              fontWeight={700}
-                              color="text.primary"
-                              sx={{ "&:hover": { color: "primary.main" }, transition: "color 0.2s", cursor: "pointer" }}
+                        {/* Overlay actions */}
+                        <Box
+                          className="product-actions-overlay"
+                          sx={{
+                            position: "absolute",
+                            inset: 0,
+                            bgcolor: alpha("#000", 0.38),
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 1.5,
+                            opacity: 0,
+                            transition: "opacity 0.3s",
+                          }}
+                        >
+                          <Tooltip title="Add to Cart">
+                            <IconButton
+                              onClick={() => handleAddToCart(product)}
+                              sx={{ bgcolor: "white", color: "primary.main", "&:hover": { bgcolor: "primary.main", color: "white" } }}
                             >
-                              {product.name}
-                            </Typography>
-                          </Link>
-                          <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5, mb: 1.5 }}>
-                            {product.description}
+                              <CartIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Customize">
+                            <IconButton
+                              onClick={() => openCustomizationModal(product.id)}
+                              sx={{ bgcolor: "white", color: "#8b5cf6", "&:hover": { bgcolor: "#8b5cf6", color: "white" } }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                        {/* Wishlist */}
+                        <IconButton
+                          onClick={() => toggleWishlist(product.id)}
+                          sx={{
+                            position: "absolute",
+                            top: 8,
+                            right: 8,
+                            bgcolor: alpha("#fff", 0.9),
+                            backdropFilter: "blur(4px)",
+                            "&:hover": { bgcolor: "white" },
+                          }}
+                        >
+                          {isWishlisted ? (
+                            <HeartIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                          ) : (
+                            <HeartBorderIcon sx={{ color: "text.secondary", fontSize: 20 }} />
+                          )}
+                        </IconButton>
+                      </Box>
+
+                      <CardContent sx={{ px: 2.5, pt: 2, pb: 1 }}>
+                        <Link href={`/products/${product.id}`} style={{ textDecoration: "none" }}>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            color="text.primary"
+                            sx={{ "&:hover": { color: "primary.main" }, transition: "color 0.2s", cursor: "pointer" }}
+                          >
+                            {product.name}
                           </Typography>
-                          {/* Price + Quantity */}
-                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <Typography
-                              variant="h6"
-                              fontWeight={800}
-                              sx={{
-                                background: "linear-gradient(135deg, #be185d, #7c3aed)",
-                                WebkitBackgroundClip: "text",
-                                WebkitTextFillColor: "transparent",
-                              }}
-                            >
-                              ₹{product.price}
-                            </Typography>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleQuantityChange(product.id, -1)}
-                                sx={{ bgcolor: alpha("#ec4899", 0.1), color: "primary.main", width: 28, height: 28 }}
-                              >
-                                <RemoveIcon sx={{ fontSize: 14 }} />
-                              </IconButton>
-                              <Typography fontWeight={700} sx={{ minWidth: 24, textAlign: "center" }}>
-                                {quantities[product.id] || 1}
-                              </Typography>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleQuantityChange(product.id, 1)}
-                                sx={{ bgcolor: alpha("#ec4899", 0.1), color: "primary.main", width: 28, height: 28 }}
-                              >
-                                <AddIcon sx={{ fontSize: 14 }} />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                        </CardContent>
-
-                        <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
-                          <Button
-                            fullWidth
-                            variant="contained"
-                            startIcon={<CartIcon />}
-                            onClick={() => handleAddToCart(product)}
+                        </Link>
+                        <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5, mb: 1.5 }}>
+                          {product.description}
+                        </Typography>
+                        {/* Price + Quantity */}
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <Typography
+                            variant="h6"
+                            fontWeight={800}
                             sx={{
-                              borderRadius: "50px",
-                              py: 1.2,
-                              fontWeight: 700,
-                              background: isAdded
-                                ? "linear-gradient(135deg, #22c55e, #16a34a)"
-                                : "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                              boxShadow: isAdded
-                                ? "0 4px 15px rgba(34,197,94,0.4)"
-                                : "0 4px 15px rgba(236,72,153,0.35)",
-                              transition: "all 0.3s",
-                              "&:hover": {
-                                background: isAdded
-                                  ? "linear-gradient(135deg, #16a34a, #15803d)"
-                                  : "linear-gradient(135deg, #be185d, #7c3aed)",
-                                transform: "scale(1.02)",
-                              },
+                              background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                              WebkitBackgroundClip: "text",
+                              WebkitTextFillColor: "transparent",
                             }}
                           >
-                            {isAdded ? "✓ Added!" : "Add to Cart"}
-                          </Button>
-                        </CardActions>
-                      </Card>
-                    </motion.div>
-                  </Grid>
-                )
-              })}
+                            ₹{product.price}
+                          </Typography>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleQuantityChange(product.id, -1)}
+                              sx={{ bgcolor: alpha("#ec4899", 0.1), color: "primary.main", width: 28, height: 28 }}
+                            >
+                              <RemoveIcon sx={{ fontSize: 14 }} />
+                            </IconButton>
+                            <Typography fontWeight={700} sx={{ minWidth: 24, textAlign: "center" }}>
+                              {quantities[product.id] || 1}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleQuantityChange(product.id, 1)}
+                              sx={{ bgcolor: alpha("#ec4899", 0.1), color: "primary.main", width: 28, height: 28 }}
+                            >
+                              <AddIcon sx={{ fontSize: 14 }} />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </CardContent>
+
+                      <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          startIcon={<CartIcon />}
+                          onClick={() => handleAddToCart(product)}
+                          sx={{
+                            borderRadius: "50px",
+                            py: 1.2,
+                            fontWeight: 700,
+                            background: isAdded
+                              ? "linear-gradient(135deg, #22c55e, #16a34a)"
+                              : "linear-gradient(135deg, #ec4899, #8b5cf6)",
+                            boxShadow: isAdded
+                              ? "0 4px 15px rgba(34,197,94,0.4)"
+                              : "0 4px 15px rgba(236,72,153,0.35)",
+                            transition: "all 0.3s",
+                            "&:hover": {
+                              background: isAdded
+                                ? "linear-gradient(135deg, #16a34a, #15803d)"
+                                : "linear-gradient(135deg, #be185d, #7c3aed)",
+                              transform: "scale(1.02)",
+                            },
+                          }}
+                        >
+                          {isAdded ? "✓ Added!" : "Add to Cart"}
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  </motion.div>
+                </Grid>
+              )
+            })}
         </Grid>
       </Container>
 
