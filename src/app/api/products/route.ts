@@ -48,45 +48,129 @@ export async function POST(req: Request) {
 const MOCK_PRODUCTS = [
   {
     id: 1,
-    name: 'Classic Vanilla Cupcake',
-    description: 'A timeless classic. Soft vanilla sponge topped with creamy vanilla buttercream.',
-    price: 80,
-    image: '/images/vanilla-cupcake.jpg'
+    name: 'Blueberry Truffle',
+    description: 'Luscious blueberry filling encased in a smooth white chocolate shell.',
+    price: 150,
+    image: '/Blueberry_Truffle.jpg'
   },
   {
     id: 2,
-    name: 'Double Chocolate Fudge',
-    description: 'For the chocolate lovers. Rich chocolate cake with a decadent fudge core and chocolate frosting.',
-    price: 120,
-    image: '/images/chocolate-cupcake.jpg'
+    name: 'Brownie Tub',
+    description: 'A decadent tub filled with gooey brownie chunks and chocolate sauce.',
+    price: 250,
+    image: '/Brownie_tub.jpg'
   },
   {
     id: 3,
-    name: 'Strawberry Dream',
-    description: 'Fresh strawberry cake topped with light strawberry whipped cream.',
-    price: 90,
-    image: '/images/strawberry-cupcake.jpg'
+    name: 'Chocolate Chip Cookies',
+    description: 'Classic crunchy cookies loaded with premium chocolate chips.',
+    price: 120,
+    image: '/Chocolate_Chips_Cookie.jpg'
   },
   {
     id: 4,
-    name: 'Red Velvet Royale',
-    description: 'Classic red velvet cake with a smooth cream cheese frosting.',
-    price: 110,
-    image: '/images/red-velvet.jpg'
+    name: 'Coconut Truffle',
+    description: 'Exotic coconut centers dipped in rich milk chocolate.',
+    price: 140,
+    image: '/Coconut_Truffle.jpg'
   },
   {
     id: 5,
-    name: 'Lemon Meringue',
-    description: 'Zesty lemon cupcake filled with lemon curd and topped with toasted meringue.',
-    price: 100,
-    image: '/images/lemon-meringue.jpg'
+    name: 'Cookie Dough Brownie',
+    description: 'The best of both worlds: fudgy brownie topped with edible cookie dough.',
+    price: 180,
+    image: '/Cookie_Dough_Brownie.jpg'
   },
   {
     id: 6,
-    name: 'Salted Caramel Crunch',
-    description: 'Vanilla bean cake with a caramel center, caramel frosting, and sea salt sprinkle.',
+    name: 'Cookie Dough Brownie Cup',
+    description: 'Individual portions of our famous cookie dough brownie.',
+    price: 120,
+    image: '/Cookie_Dough_Brownie_Cup.jpg'
+  },
+  {
+    id: 7,
+    name: 'Cranberry Pistachio Blondie',
+    description: 'Sweet and salty blondie with tart cranberries and roasted pistachios.',
+    price: 160,
+    image: '/Cranberry_pistachio_blondie.jpg'
+  },
+  {
+    id: 8,
+    name: 'Dark Chocolate Hazelnut Brownie',
+    description: 'Rich dark chocolate brownie with toasted hazelnuts.',
+    price: 190,
+    image: '/Dark_Chocolate_hazelnut_Brownie.jpg'
+  },
+  {
+    id: 9,
+    name: 'Dark Chocolate Walnut Brownie',
+    description: 'Intense dark chocolate brownie with crunchy walnut pieces.',
+    price: 190,
+    image: '/Dark_Chocolate_walnut_brownie.jpg'
+  },
+  {
+    id: 10,
+    name: 'Assorted Donuts',
+    description: 'A variety of fresh, fluffy donuts with different glazes and toppings.',
+    price: 200,
+    image: '/Donuts.jpg'
+  },
+  {
+    id: 11,
+    name: 'Jim Jam Cookies',
+    description: 'Nostalgic jam-filled sandwich cookies.',
+    price: 100,
+    image: '/Jim_Jam_Cookies.jpg'
+  },
+  {
+    id: 12,
+    name: 'Mint Chocolate Chip Truffle',
+    description: 'Refreshing mint cream and chocolate chips in a dark shell.',
+    price: 150,
+    image: '/Mint_chocolate_Chips_Truffle.jpg'
+  },
+  {
+    id: 13,
+    name: 'Nutella Sandwich Cookies',
+    description: 'Buttery cookies sandwiched with a generous layer of Nutella.',
+    price: 160,
+    image: '/Nutella_Sandwich_Cookies.jpg'
+  },
+  {
+    id: 14,
+    name: 'Rasmalai Truffle',
+    description: 'Fusion delight: White chocolate truffle with authentic Rasmalai flavor.',
+    price: 180,
+    image: '/Rasmalai_Truffle.jpg'
+  },
+  {
+    id: 15,
+    name: 'Rose Pistachio Cranberry Truffle',
+    description: 'Elegant truffle with rose notes, pistachios, and cranberries.',
+    price: 180,
+    image: '/Rose-pistacho_cranberry_truffle.jpg'
+  },
+  {
+    id: 16,
+    name: 'Chilli Cheese Cookies',
+    description: 'Savoury cookies with a spicy kick of chilli and cheese.',
     price: 130,
-    image: '/images/salted-caramel.jpg'
+    image: '/chilli_cheese_cookies.jpg'
+  },
+  {
+    id: 17,
+    name: 'Choco Day Cookies',
+    description: 'Rich chocolate cookies for everyday indulgence.',
+    price: 110,
+    image: '/choco_day_cookies.jpg'
+  },
+  {
+    id: 18,
+    name: 'Signature Cupcake',
+    description: 'Our famous handcrafted cupcake with velvet smooth frosting.',
+    price: 95,
+    image: '/cupcake.jpg'
   }
 ];
 
