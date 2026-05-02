@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface Product {
-  _id: string;
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -19,7 +19,7 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [formData, setFormData] = useState({ name: "", description: "", price: "", image: "" });
   const [message, setMessage] = useState("");
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -44,8 +44,8 @@ export default function AdminDashboard() {
     setMessage("");
 
     try {
-      const method = editingProductId ? "PUT" : "POST";
-      const url = editingProductId ? `/api/products/${editingProductId}` : "/api/products";
+      const method = editingProductId !== null ? "PUT" : "POST";
+      const url = editingProductId !== null ? `/api/products/${editingProductId}` : "/api/products";
 
       const res = await fetch(url, {
         method,
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
 
   const handleEdit = (product: Product) => {
     setFormData({ name: product.name, description: product.description, price: String(product.price), image: product.image });
-    setEditingProductId(product._id);
+    setEditingProductId(product.id);
   };
 
   return (
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
           </TableHeader>
           <TableBody>
             {products.map((product) => (
-              <TableRow key={product._id}>
+              <TableRow key={product.id}>
                 <TableCell>
                   <Image
                     src={product.image}
@@ -132,10 +132,10 @@ export default function AdminDashboard() {
                 </TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.description}</TableCell>
-                <TableCell>${product.price}</TableCell>
+                <TableCell>₹{product.price}</TableCell>
                 <TableCell>
                   <Button variant="ghost" onClick={() => handleEdit(product)}><Pencil className="w-5 h-5" /></Button>
-                  <Button variant="ghost" onClick={() => handleDelete(product._id)}><Trash className="w-5 h-5 text-red-500" /></Button>
+                  <Button variant="ghost" onClick={() => handleDelete(product.id)}><Trash className="w-5 h-5 text-red-500" /></Button>
                 </TableCell>
               </TableRow>
             ))}
