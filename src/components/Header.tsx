@@ -110,7 +110,7 @@ export default function Header() {
     { title: "Gallery", path: "/gallery" },
     { title: "Contact", path: "/contact" },
     { title: "Review", path: "/review" },
-    { title: "Admin", path: "/admin", bold: true },
+    { title: "Admin", path: "/admin/login", bold: true },
   ]
 
   return (
