@@ -4,11 +4,11 @@ import { useState } from "react";
 export default function AdminRegister() {
   const [form, setForm] = useState({ username: "", password: "", role: "admin" });
 
-  const handleChange = (e: unknown) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: unknown) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const res = await fetch("/api/register", {

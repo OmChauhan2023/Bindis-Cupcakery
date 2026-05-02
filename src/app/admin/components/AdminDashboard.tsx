@@ -30,7 +30,7 @@ export default function AdminDashboard() {
       const res = await fetch("/api/products");
       const data = await res.json();
       setProducts(data.products);
-    } catch {
+    } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
