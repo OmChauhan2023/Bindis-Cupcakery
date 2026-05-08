@@ -31,6 +31,13 @@ import {
   Tooltip,
   Badge,
   Divider,
+  Select,
+  MenuItem,
+  InputAdornment,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Rating,
 } from "@mui/material"
 import {
   ShoppingCart as CartIcon,
@@ -41,6 +48,10 @@ import {
   Edit as EditIcon,
   Close as CloseIcon,
   LocalOffer as TagIcon,
+  Search as SearchIcon,
+  Sort as SortIcon,
+  GridView as GridIcon,
+  ViewList as ListIcon,
 } from "@mui/icons-material"
 import { useCart } from "@/app/cart/components/CartContext"
 
@@ -50,7 +61,10 @@ interface Product {
   description: string
   price: number
   image: string
+  category?: string
 }
+
+const CATEGORIES = ["All", "Cupcake", "Brownie", "Cookie", "Truffle", "Donut"]
 
 interface CustomizationOptions {
   toppings: string[]
@@ -70,6 +84,10 @@ export default function ProductPage() {
   })
   const [customization, setCustomization] = useState<CustomizationOptions>({ toppings: [], message: "" })
   const [addedToCart, setAddedToCart] = useState<Set<number>>(new Set())
+  const [search, setSearch] = useState("")
+  const [category, setCategory] = useState("All")
+  const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "name">("featured")
+  const [view, setView] = useState<"grid" | "list">("grid")
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -102,7 +120,7 @@ export default function ProductPage() {
 
   const handleAddToCart = (product: Product) => {
     addToCart({
-      id: product.id,
+      id: String(product.id),
       name: product.name,
       image: product.image,
       price: product.price,
@@ -139,6 +157,21 @@ export default function ProductPage() {
     e.preventDefault()
     closeCustomizationModal()
   }
+
+  const filteredProducts = (() => {
+    const filtered = products
+      .filter((p) => category === "All" || p.category === category)
+      .filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase())
+      )
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "price-asc") return a.price - b.price
+      if (sortBy === "price-desc") return b.price - a.price
+      if (sortBy === "name") return a.name.localeCompare(b.name)
+      return 0
+    })
+  })()
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa" }}>
@@ -186,6 +219,77 @@ export default function ProductPage() {
           </Alert>
         )}
 
+        {/* Filter & Sort Bar */}
+        <Box sx={{ mb: 4, p: 2.5, borderRadius: 4, bgcolor: "white", border: "1px solid", borderColor: "divider", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }}>
+            <TextField
+              placeholder="Search treats…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              size="small"
+              sx={{ flex: 1, "& .MuiOutlinedInput-root": { borderRadius: 50 } }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+              }}
+            />
+            <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: { xs: 0.5, md: 0 } }}>
+              {CATEGORIES.map((c) => (
+                <Chip
+                  key={c}
+                  label={c}
+                  onClick={() => setCategory(c)}
+                  sx={{
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    background: category === c ? "linear-gradient(135deg, #ec4899, #8b5cf6)" : "transparent",
+                    color: category === c ? "white" : "text.secondary",
+                    border: "1px solid",
+                    borderColor: category === c ? "transparent" : "divider",
+                    "&:hover": { borderColor: "primary.main" },
+                  }}
+                />
+              ))}
+            </Stack>
+            <Select
+              size="small"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              startAdornment={<InputAdornment position="start"><SortIcon sx={{ fontSize: 18 }} /></InputAdornment>}
+              sx={{ minWidth: 170, borderRadius: 50, "& .MuiOutlinedInput-notchedOutline": { borderRadius: 50 } }}
+            >
+              <MenuItem value="featured">Featured</MenuItem>
+              <MenuItem value="price-asc">Price: Low to High</MenuItem>
+              <MenuItem value="price-desc">Price: High to Low</MenuItem>
+              <MenuItem value="name">Name (A–Z)</MenuItem>
+            </Select>
+            <ToggleButtonGroup
+              size="small"
+              value={view}
+              exclusive
+              onChange={(_, v) => v && setView(v)}
+              sx={{ "& .MuiToggleButton-root": { borderRadius: 2, px: 1.5 } }}
+            >
+              <ToggleButton value="grid"><GridIcon fontSize="small" /></ToggleButton>
+              <ToggleButton value="list"><ListIcon fontSize="small" /></ToggleButton>
+            </ToggleButtonGroup>
+          </Stack>
+        </Box>
+
+        {!loading && (
+          <Box sx={{ mb: 2.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing <Typography component="span" fontWeight={700} color="text.primary">{filteredProducts.length}</Typography> of {products.length} treats
+            </Typography>
+          </Box>
+        )}
+
+        {!loading && filteredProducts.length === 0 ? (
+          <Box sx={{ textAlign: "center", py: 10 }}>
+            <Typography variant="h5" fontWeight={700} color="text.secondary">No treats match your search 🥺</Typography>
+            <Typography variant="body2" color="text.disabled" mt={1}>Try a different category or search term</Typography>
+          </Box>
+        ) : null}
+
         {/* Products Grid */}
         <Grid container spacing={3}>
           {loading
@@ -194,13 +298,16 @@ export default function ProductPage() {
                 <Skeleton variant="rounded" height={400} sx={{ borderRadius: 3 }} />
               </Grid>
             ))
-            : products.map((product, index) => {
+            : filteredProducts.map((product, index) => {
               const imageUrl = product.image?.startsWith("/") ? product.image : `/${product.image}`
               const isWishlisted = wishlist.has(product.id)
               const isAdded = addedToCart.has(product.id)
+              const gridSize = view === "list"
+                ? { xs: 12 }
+                : { xs: 12, sm: 6, md: 4, lg: 3 }
 
               return (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                <Grid item {...gridSize} key={product.id}>
                   <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
