@@ -2,52 +2,69 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-interface CartItem {
+export interface CartCustomization {
+  label: string;
+  value: string;
+}
+
+export interface CartItem {
   id: string;
+  cartKey?: string;
   name: string;
   price: number;
   qty: number;
   image: string;
+  customizations?: CartCustomization[];
+  note?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  updateQuantity: (id: string, qty: number) => void;
-  removeFromCart: (id: string) => void;
+  updateQuantity: (cartKey: string, qty: number) => void;
+  removeFromCart: (cartKey: string) => void;
   clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function buildCartKey(item: CartItem): string {
+  const sig = JSON.stringify({
+    c: item.customizations || [],
+    n: item.note || "",
+  });
+  return `${item.id}::${sig}`;
+}
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
   const addToCart = (item: CartItem) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
-      if (existingItem) {
-        return prevCart.map((cartItem) =>
-          cartItem.id === item.id ? { ...cartItem, qty: cartItem.qty + item.qty } : cartItem
+    const cartKey = buildCartKey(item);
+    setCart((prev) => {
+      const existing = prev.find((c) => c.cartKey === cartKey);
+      if (existing) {
+        return prev.map((c) =>
+          c.cartKey === cartKey ? { ...c, qty: c.qty + item.qty } : c
         );
       }
-      return [...prevCart, item];
+      return [...prev, { ...item, cartKey }];
     });
   };
 
-  const updateQuantity = (id: string, qty: number) => {
-    setCart((prevCart) =>
-      prevCart.map((item) => (item.id === id ? { ...item, qty: Math.max(1, qty) } : item))
+  const updateQuantity = (cartKey: string, qty: number) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.cartKey === cartKey ? { ...item, qty: Math.max(1, qty) } : item
+      )
     );
   };
 
-  const removeFromCart = (id: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  const removeFromCart = (cartKey: string) => {
+    setCart((prev) => prev.filter((item) => item.cartKey !== cartKey));
   };
 
-  const clearCart = () => {
-    setCart([]);
-  };
+  const clearCart = () => setCart([]);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart }}>

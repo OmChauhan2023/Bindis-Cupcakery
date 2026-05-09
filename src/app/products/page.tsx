@@ -1,6 +1,5 @@
 "use client"
 
-import type React from "react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
@@ -12,18 +11,10 @@ import {
   Grid,
   Card,
   CardContent,
-  CardActions,
   Button,
   IconButton,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  FormControlLabel,
-  Checkbox,
-  FormGroup,
   Alert,
   Skeleton,
   alpha,
@@ -36,19 +27,16 @@ import {
   ToggleButtonGroup,
 } from "@mui/material"
 import {
-  ShoppingCart as CartIcon,
   Favorite as HeartIcon,
   FavoriteBorder as HeartBorderIcon,
   Add as AddIcon,
-  Remove as RemoveIcon,
-  Edit as EditIcon,
-  Close as CloseIcon,
   Search as SearchIcon,
   Sort as SortIcon,
   GridView as GridIcon,
   ViewList as ListIcon,
+  Visibility as EyeIcon,
 } from "@mui/icons-material"
-import { useCart } from "@/app/cart/components/CartContext"
+import QuickViewModal from "./components/QuickViewModal"
 
 interface Product {
   id: number
@@ -61,28 +49,16 @@ interface Product {
 
 const CATEGORIES = ["All", "Cupcake", "Brownie", "Cookie", "Truffle", "Donut"]
 
-interface CustomizationOptions {
-  toppings: string[]
-  message: string
-}
-
 export default function ProductPage() {
-  const { addToCart } = useCart()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
-  const [quantities, setQuantities] = useState<{ [key: number]: number }>({})
   const [wishlist, setWishlist] = useState<Set<number>>(new Set())
-  const [customizationModal, setCustomizationModal] = useState<{ isOpen: boolean; productId: number | null }>({
-    isOpen: false,
-    productId: null,
-  })
-  const [customization, setCustomization] = useState<CustomizationOptions>({ toppings: [], message: "" })
-  const [addedToCart, setAddedToCart] = useState<Set<number>>(new Set())
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("All")
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "name">("featured")
   const [view, setView] = useState<"grid" | "list">("grid")
+  const [activeProduct, setActiveProduct] = useState<Product | null>(null)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -92,11 +68,6 @@ export default function ProductPage() {
         const data = await res.json()
         if (!data.products || !Array.isArray(data.products)) throw new Error("Invalid API response format")
         setProducts(data.products)
-        const initialQuantities = data.products.reduce((acc: { [key: number]: number }, product: Product) => {
-          acc[product.id] = 1
-          return acc
-        }, {})
-        setQuantities(initialQuantities)
       } catch {
         setError("Failed to load products. Please try again.")
       } finally {
@@ -106,31 +77,6 @@ export default function ProductPage() {
     fetchProducts()
   }, [])
 
-  const handleQuantityChange = (productId: number, change: number) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [productId]: Math.max(1, (prev[productId] || 1) + change),
-    }))
-  }
-
-  const handleAddToCart = (product: Product) => {
-    addToCart({
-      id: String(product.id),
-      name: product.name,
-      image: product.image,
-      price: product.price,
-      qty: quantities[product.id] || 1,
-    })
-    setAddedToCart((prev) => new Set(prev).add(product.id))
-    setTimeout(() => {
-      setAddedToCart((prev) => {
-        const next = new Set(prev)
-        next.delete(product.id)
-        return next
-      })
-    }, 1500)
-  }
-
   const toggleWishlist = (id: number) => {
     setWishlist((prev) => {
       const next = new Set(prev)
@@ -138,20 +84,6 @@ export default function ProductPage() {
       else next.add(id)
       return next
     })
-  }
-
-  const openCustomizationModal = (productId: number) => {
-    setCustomizationModal({ isOpen: true, productId })
-  }
-
-  const closeCustomizationModal = () => {
-    setCustomizationModal({ isOpen: false, productId: null })
-    setCustomization({ toppings: [], message: "" })
-  }
-
-  const handleCustomization = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    closeCustomizationModal()
   }
 
   const filteredProducts = (() => {
@@ -170,7 +102,7 @@ export default function ProductPage() {
   })()
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#fdfaf7" }}>
       {/* Hero Banner */}
       <Box
         sx={{
@@ -208,7 +140,6 @@ export default function ProductPage() {
       </Box>
 
       <Container maxWidth="xl" sx={{ py: 6 }}>
-        {/* Error */}
         {error && (
           <Alert severity="error" sx={{ mb: 4, borderRadius: 2 }}>
             {error}
@@ -237,7 +168,7 @@ export default function ProductPage() {
                   sx={{
                     fontWeight: 700,
                     cursor: "pointer",
-                    background: category === c ? "linear-gradient(135deg, #ec4899, #8b5cf6)" : "transparent",
+                    background: category === c ? "linear-gradient(135deg, #d97a9c, #9b7bd0)" : "transparent",
                     color: category === c ? "white" : "text.secondary",
                     border: "1px solid",
                     borderColor: category === c ? "transparent" : "divider",
@@ -274,7 +205,7 @@ export default function ProductPage() {
         {!loading && (
           <Box sx={{ mb: 2.5 }}>
             <Typography variant="body2" color="text.secondary">
-              Showing <Typography component="span" fontWeight={700} color="text.primary">{filteredProducts.length}</Typography> of {products.length} treats
+              Showing <Typography component="span" fontWeight={700} color="text.primary">{filteredProducts.length}</Typography> of {products.length} treats — tap any item for ingredients & customization
             </Typography>
           </Box>
         )}
@@ -297,31 +228,33 @@ export default function ProductPage() {
             : filteredProducts.map((product, index) => {
               const imageUrl = product.image?.startsWith("/") ? product.image : `/${product.image}`
               const isWishlisted = wishlist.has(product.id)
-              const isAdded = addedToCart.has(product.id)
               const gridSize = view === "list"
                 ? { xs: 12 }
                 : { xs: 12, sm: 6, md: 4, lg: 3 }
+              const openQuickView = () => setActiveProduct(product)
 
               return (
                 <Grid item {...gridSize} key={product.id}>
                   <motion.div
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.06, duration: 0.4 }}
+                    transition={{ delay: index * 0.04, duration: 0.35 }}
                   >
                     <Card
                       sx={{
                         borderRadius: 4,
                         overflow: "hidden",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                        transition: "all 0.35s ease",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+                        transition: "all 0.3s ease",
+                        cursor: "pointer",
                         "&:hover": {
-                          boxShadow: "0 20px 60px rgba(236,72,153,0.18)",
-                          transform: "translateY(-6px)",
-                          "& .product-img": { transform: "scale(1.08)" },
-                          "& .product-actions-overlay": { opacity: 1 },
+                          boxShadow: "0 16px 50px rgba(217,122,156,0.18)",
+                          transform: "translateY(-4px)",
+                          "& .product-img": { transform: "scale(1.06)" },
+                          "& .quick-overlay": { opacity: 1 },
                         },
                       }}
+                      onClick={openQuickView}
                     >
                       {/* Image */}
                       <Box sx={{ position: "relative", height: 220, overflow: "hidden" }}>
@@ -334,73 +267,91 @@ export default function ProductPage() {
                             priority={index < 4}
                           />
                         </Box>
-                        {/* Overlay actions */}
+
+                        {/* Quick view overlay */}
                         <Box
-                          className="product-actions-overlay"
+                          className="quick-overlay"
                           sx={{
                             position: "absolute",
                             inset: 0,
-                            bgcolor: alpha("#000", 0.38),
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            gap: 1.5,
+                            background: "linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.45) 100%)",
                             opacity: 0,
                             transition: "opacity 0.3s",
                           }}
                         >
-                          <Tooltip title="Add to Cart">
-                            <IconButton
-                              onClick={() => handleAddToCart(product)}
-                              sx={{ bgcolor: "white", color: "primary.main", "&:hover": { bgcolor: "primary.main", color: "white" } }}
-                            >
-                              <CartIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Customize">
-                            <IconButton
-                              onClick={() => openCustomizationModal(product.id)}
-                              sx={{ bgcolor: "white", color: "#8b5cf6", "&:hover": { bgcolor: "#8b5cf6", color: "white" } }}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Tooltip>
+                          <Chip
+                            icon={<EyeIcon sx={{ color: "white !important", fontSize: 16 }} />}
+                            label="Quick View"
+                            sx={{
+                              bgcolor: alpha("#fff", 0.95),
+                              color: "#9d4870",
+                              fontWeight: 700,
+                              backdropFilter: "blur(6px)",
+                              "& .MuiChip-icon": { color: "#9d4870 !important" },
+                            }}
+                          />
                         </Box>
+
                         {/* Wishlist */}
                         <IconButton
-                          onClick={() => toggleWishlist(product.id)}
+                          onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id) }}
                           sx={{
                             position: "absolute",
                             top: 8,
                             right: 8,
-                            bgcolor: alpha("#fff", 0.9),
+                            bgcolor: alpha("#fff", 0.92),
                             backdropFilter: "blur(4px)",
                             "&:hover": { bgcolor: "white" },
                           }}
                         >
                           {isWishlisted ? (
-                            <HeartIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                            <HeartIcon sx={{ color: "#d97a9c", fontSize: 20 }} />
                           ) : (
                             <HeartBorderIcon sx={{ color: "text.secondary", fontSize: 20 }} />
                           )}
                         </IconButton>
+
+                        {/* Category chip */}
+                        {product.category && (
+                          <Chip
+                            label={product.category}
+                            size="small"
+                            sx={{
+                              position: "absolute",
+                              top: 10,
+                              left: 10,
+                              bgcolor: alpha("#fff", 0.9),
+                              color: "#9d4870",
+                              fontWeight: 700,
+                              fontSize: "0.65rem",
+                              backdropFilter: "blur(6px)",
+                            }}
+                          />
+                        )}
                       </Box>
 
-                      <CardContent sx={{ px: 2.5, pt: 2, pb: 1 }}>
-                        <Link href={`/products/${product.id}`} style={{ textDecoration: "none" }}>
+                      <CardContent sx={{ px: 2.5, pt: 2, pb: 2.5 }}>
+                        <Link
+                          href={`/products/${product.id}`}
+                          style={{ textDecoration: "none" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Typography
                             variant="subtitle1"
                             fontWeight={700}
                             color="text.primary"
-                            sx={{ "&:hover": { color: "primary.main" }, transition: "color 0.2s", cursor: "pointer" }}
+                            sx={{ "&:hover": { color: "primary.main" }, transition: "color 0.2s" }}
                           >
                             {product.name}
                           </Typography>
                         </Link>
-                        <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5, mb: 1.5 }}>
+                        <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5, mb: 2 }}>
                           {product.description}
                         </Typography>
-                        {/* Price + Quantity */}
+
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <Typography
                             variant="h6"
@@ -413,56 +364,30 @@ export default function ProductPage() {
                           >
                             ₹{product.price}
                           </Typography>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <IconButton
+
+                          <Tooltip title="Customize & add to cart">
+                            <Button
+                              onClick={(e) => { e.stopPropagation(); openQuickView() }}
+                              variant="contained"
                               size="small"
-                              onClick={() => handleQuantityChange(product.id, -1)}
-                              sx={{ bgcolor: alpha("#ec4899", 0.1), color: "primary.main", width: 28, height: 28 }}
+                              startIcon={<AddIcon />}
+                              sx={{
+                                borderRadius: 50,
+                                fontWeight: 700,
+                                px: 2,
+                                background: "linear-gradient(135deg, #d97a9c, #9b7bd0)",
+                                boxShadow: "0 4px 14px rgba(217,122,156,0.28)",
+                                "&:hover": {
+                                  background: "linear-gradient(135deg, #c2628a, #8568b8)",
+                                  boxShadow: "0 6px 18px rgba(217,122,156,0.4)",
+                                },
+                              }}
                             >
-                              <RemoveIcon sx={{ fontSize: 14 }} />
-                            </IconButton>
-                            <Typography fontWeight={700} sx={{ minWidth: 24, textAlign: "center" }}>
-                              {quantities[product.id] || 1}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleQuantityChange(product.id, 1)}
-                              sx={{ bgcolor: alpha("#ec4899", 0.1), color: "primary.main", width: 28, height: 28 }}
-                            >
-                              <AddIcon sx={{ fontSize: 14 }} />
-                            </IconButton>
-                          </Box>
+                              Add
+                            </Button>
+                          </Tooltip>
                         </Box>
                       </CardContent>
-
-                      <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          startIcon={<CartIcon />}
-                          onClick={() => handleAddToCart(product)}
-                          sx={{
-                            borderRadius: "50px",
-                            py: 1.2,
-                            fontWeight: 700,
-                            background: isAdded
-                              ? "linear-gradient(135deg, #22c55e, #16a34a)"
-                              : "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                            boxShadow: isAdded
-                              ? "0 4px 15px rgba(34,197,94,0.4)"
-                              : "0 4px 15px rgba(236,72,153,0.35)",
-                            transition: "all 0.3s",
-                            "&:hover": {
-                              background: isAdded
-                                ? "linear-gradient(135deg, #16a34a, #15803d)"
-                                : "linear-gradient(135deg, #be185d, #7c3aed)",
-                              transform: "scale(1.02)",
-                            },
-                          }}
-                        >
-                          {isAdded ? "✓ Added!" : "Add to Cart"}
-                        </Button>
-                      </CardActions>
                     </Card>
                   </motion.div>
                 </Grid>
@@ -471,99 +396,13 @@ export default function ProductPage() {
         </Grid>
       </Container>
 
-      {/* Customization Modal */}
-      <Dialog
-        open={customizationModal.isOpen}
-        onClose={closeCustomizationModal}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 4 } }}
-      >
-        <DialogTitle
-          sx={{
-            background: "linear-gradient(135deg, #fce7f3, #f5f3ff)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            pb: 2,
-          }}
-        >
-          <Typography variant="h6" fontWeight={700}>
-            🎨 Customize Your Cupcake
-          </Typography>
-          <IconButton onClick={closeCustomizationModal} size="small">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <form onSubmit={handleCustomization}>
-          <DialogContent sx={{ pt: 3 }}>
-            <Typography variant="subtitle2" fontWeight={600} mb={1.5} color="text.secondary">
-              Choose Toppings
-            </Typography>
-            <FormGroup row sx={{ gap: 1, mb: 3 }}>
-              {["Sprinkles", "Chocolate Chips", "Nuts", "Fruit"].map((topping) => (
-                <FormControlLabel
-                  key={topping}
-                  control={
-                    <Checkbox
-                      checked={customization.toppings.includes(topping)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setCustomization((prev) => ({ ...prev, toppings: [...prev.toppings, topping] }))
-                        } else {
-                          setCustomization((prev) => ({
-                            ...prev,
-                            toppings: prev.toppings.filter((t) => t !== topping),
-                          }))
-                        }
-                      }}
-                      sx={{ color: "primary.main" }}
-                    />
-                  }
-                  label={topping}
-                  sx={{
-                    border: "1px solid",
-                    borderColor: customization.toppings.includes(topping) ? "primary.main" : "divider",
-                    borderRadius: 2,
-                    px: 1,
-                    m: 0,
-                    bgcolor: customization.toppings.includes(topping) ? alpha("#ec4899", 0.06) : "transparent",
-                    transition: "all 0.2s",
-                  }}
-                />
-              ))}
-            </FormGroup>
-            <TextField
-              fullWidth
-              label="Custom Message on Cake"
-              placeholder="e.g. Happy Birthday! 🎂"
-              value={customization.message}
-              onChange={(e) => setCustomization((prev) => ({ ...prev, message: e.target.value }))}
-              multiline
-              rows={2}
-              variant="outlined"
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-            <Button onClick={closeCustomizationModal} variant="outlined" sx={{ borderRadius: "50px", px: 3 }}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                borderRadius: "50px",
-                px: 4,
-                background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                fontWeight: 700,
-              }}
-            >
-              Apply Customization
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+      <QuickViewModal
+        product={activeProduct}
+        open={!!activeProduct}
+        onClose={() => setActiveProduct(null)}
+        isFavorite={activeProduct ? wishlist.has(activeProduct.id) : false}
+        onToggleFavorite={toggleWishlist}
+      />
     </Box>
   )
 }
