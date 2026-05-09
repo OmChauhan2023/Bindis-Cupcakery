@@ -106,7 +106,7 @@ export default function AdminProducts() {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={openCreate}
-            sx={{ borderRadius: "50px", background: "linear-gradient(135deg, #ec4899, #8b5cf6)", fontWeight: 700, px: 3 }}
+            sx={{ borderRadius: "50px", background: "linear-gradient(135deg, #d97a9c, #9b7bd0)", fontWeight: 700, px: 3 }}
           >
             New Product
           </Button>
@@ -159,7 +159,7 @@ export default function AdminProducts() {
       </Paper>
 
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 4 } }}>
-        <DialogTitle sx={{ background: "linear-gradient(135deg, #fce7f3, #f5f3ff)", fontWeight: 700 }}>
+        <DialogTitle sx={{ background: "linear-gradient(135deg, #fdf2f4, #f5eef9)", fontWeight: 700 }}>
           {editing ? "Edit Product" : "New Product"}
         </DialogTitle>
         <DialogContent sx={{ pt: 3, mt: 1 }}>
@@ -176,7 +176,7 @@ export default function AdminProducts() {
             disabled={saving}
             variant="contained"
             startIcon={<SaveIcon />}
-            sx={{ borderRadius: "50px", px: 3, background: "linear-gradient(135deg, #ec4899, #8b5cf6)", fontWeight: 700 }}
+            sx={{ borderRadius: "50px", px: 3, background: "linear-gradient(135deg, #d97a9c, #9b7bd0)", fontWeight: 700 }}
           >
             {saving ? "Saving…" : "Save"}
           </Button>

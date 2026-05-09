@@ -1,9 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import Header from "../components/Header";
-import { Footer } from "../components/Footer";
+import LayoutShell from "../components/LayoutShell";
 import { CartProvider } from "./cart/components/CartContext";
-import WhatsAppFloat from "@/components/whatsapp-float";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -27,10 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <CartProvider>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-              <WhatsAppFloat />
+              <LayoutShell>{children}</LayoutShell>
             </CartProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>

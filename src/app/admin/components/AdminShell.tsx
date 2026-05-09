@@ -66,7 +66,7 @@ export default function AdminShell({ children, title }: { children: React.ReactN
   }
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#fafafa" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#fdfaf7" }}>
       <Drawer
         variant="permanent"
         sx={{
@@ -75,20 +75,35 @@ export default function AdminShell({ children, title }: { children: React.ReactN
           "& .MuiDrawer-paper": {
             width: DRAWER_W,
             boxSizing: "border-box",
-            background: "linear-gradient(180deg, #be185d 0%, #7c3aed 100%)",
-            color: "white",
-            border: "none",
+            bgcolor: "#fffaf7",
+            color: "text.primary",
+            borderRight: "1px solid",
+            borderColor: alpha("#d4a373", 0.15),
           },
         }}
       >
         <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box sx={{ fontSize: "2rem" }}>🧁</Box>
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: 2,
+              background: "linear-gradient(135deg, #f9c2d6, #d4b5e8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1.4rem",
+              boxShadow: `0 4px 12px ${alpha("#d4a373", 0.2)}`,
+            }}
+          >
+            🧁
+          </Box>
           <Box>
-            <Typography fontWeight={800}>Bindi&apos;s</Typography>
-            <Typography variant="caption" sx={{ opacity: 0.8 }}>Admin Panel</Typography>
+            <Typography fontWeight={800} sx={{ color: "#9d4870" }}>Bindi&apos;s</Typography>
+            <Typography variant="caption" color="text.secondary">Admin Panel</Typography>
           </Box>
         </Box>
-        <Divider sx={{ borderColor: alpha("#fff", 0.15) }} />
+        <Divider sx={{ borderColor: alpha("#d4a373", 0.12) }} />
         <List sx={{ px: 1.5, py: 2 }}>
           {NAV.map((n) => {
             const active = pathname === n.href;
@@ -100,12 +115,12 @@ export default function AdminShell({ children, title }: { children: React.ReactN
                 sx={{
                   borderRadius: 2,
                   mb: 0.5,
-                  color: "white",
-                  bgcolor: active ? alpha("#fff", 0.18) : "transparent",
-                  "&:hover": { bgcolor: alpha("#fff", 0.12) },
+                  color: active ? "#9d4870" : "text.secondary",
+                  bgcolor: active ? alpha("#f9c2d6", 0.35) : "transparent",
+                  "&:hover": { bgcolor: alpha("#f9c2d6", 0.2), color: "#9d4870" },
                 }}
               >
-                <ListItemIcon sx={{ color: "white", minWidth: 38 }}>{n.icon}</ListItemIcon>
+                <ListItemIcon sx={{ color: active ? "#9d4870" : "text.secondary", minWidth: 38 }}>{n.icon}</ListItemIcon>
                 <ListItemText primary={n.label} primaryTypographyProps={{ fontWeight: active ? 700 : 500 }} />
               </ListItemButton>
             );
@@ -118,11 +133,11 @@ export default function AdminShell({ children, title }: { children: React.ReactN
             startIcon={<LogoutIcon />}
             onClick={handleLogout}
             sx={{
-              color: "white",
+              color: "#9d4870",
               borderRadius: 2,
               border: "1px solid",
-              borderColor: alpha("#fff", 0.3),
-              "&:hover": { bgcolor: alpha("#fff", 0.1) },
+              borderColor: alpha("#9d4870", 0.25),
+              "&:hover": { bgcolor: alpha("#f9c2d6", 0.2), borderColor: "#9d4870" },
             }}
           >
             Logout

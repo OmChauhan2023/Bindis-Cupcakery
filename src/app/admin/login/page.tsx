@@ -62,7 +62,7 @@ export default function AdminLogin() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(160deg, #fce7f3 0%, #fff 50%, #f5f3ff 100%)",
+        background: "linear-gradient(160deg, #fdf4ed 0%, #fff 50%, #f4eef9 100%)",
         p: 3,
       }}
     >
@@ -74,13 +74,13 @@ export default function AdminLogin() {
               width: 72,
               height: 72,
               borderRadius: 3,
-              background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+              background: "linear-gradient(135deg, #d97a9c, #9b7bd0)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               mx: "auto",
               mb: 2,
-              boxShadow: "0 12px 30px rgba(236,72,153,0.35)",
+              boxShadow: "0 12px 30px rgba(217,122,156,0.25)",
               fontSize: "2rem",
             }}
           >
@@ -100,8 +100,8 @@ export default function AdminLogin() {
             borderRadius: 5,
             p: 4,
             border: "1px solid",
-            borderColor: alpha("#ec4899", 0.15),
-            boxShadow: "0 20px 60px rgba(236,72,153,0.08)",
+            borderColor: alpha("#d97a9c", 0.15),
+            boxShadow: "0 20px 60px rgba(217,122,156,0.06)",
           }}
         >
           {error && (
@@ -164,12 +164,12 @@ export default function AdminLogin() {
                 py: 1.8,
                 fontWeight: 700,
                 fontSize: "1rem",
-                background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                boxShadow: "0 8px 30px rgba(236,72,153,0.35)",
+                background: "linear-gradient(135deg, #d97a9c, #9b7bd0)",
+                boxShadow: "0 8px 24px rgba(217,122,156,0.28)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                  background: "linear-gradient(135deg, #c2628a, #8568b8)",
                   transform: "translateY(-2px)",
-                  boxShadow: "0 12px 40px rgba(236,72,153,0.45)",
+                  boxShadow: "0 12px 32px rgba(217,122,156,0.35)",
                 },
                 "&.Mui-disabled": { opacity: 0.6 },
                 transition: "all 0.3s",

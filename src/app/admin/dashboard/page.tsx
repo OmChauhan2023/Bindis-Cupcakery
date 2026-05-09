@@ -24,8 +24,8 @@ interface Stats {
 }
 
 const modules = [
-  { title: "Manage Products", description: "Add, edit, or remove items from the catalog", icon: <ProductsIcon sx={{ fontSize: 32, color: "#ec4899" }} />, href: "/admin/products", bg: "linear-gradient(135deg, #fce7f3, #fdf2f8)", chipLabel: "Catalog", chipColor: "#ec4899" },
-  { title: "View Orders", description: "Track and manage customer orders", icon: <OrdersIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />, href: "/admin/orders", bg: "linear-gradient(135deg, #f5f3ff, #faf5ff)", chipLabel: "Orders", chipColor: "#8b5cf6" },
+  { title: "Manage Products", description: "Add, edit, or remove items from the catalog", icon: <ProductsIcon sx={{ fontSize: 32, color: "#d97a9c" }} />, href: "/admin/products", bg: "linear-gradient(135deg, #fce7f3, #fdf2f8)", chipLabel: "Catalog", chipColor: "#ec4899" },
+  { title: "View Orders", description: "Track and manage customer orders", icon: <OrdersIcon sx={{ fontSize: 32, color: "#9b7bd0" }} />, href: "/admin/orders", bg: "linear-gradient(135deg, #f5f3ff, #faf5ff)", chipLabel: "Orders", chipColor: "#8b5cf6" },
   { title: "Customers", description: "View registered customer accounts", icon: <UsersIcon sx={{ fontSize: 32, color: "#3b82f6" }} />, href: "/admin/customers", bg: "linear-gradient(135deg, #dbeafe, #eff6ff)", chipLabel: "Users", chipColor: "#3b82f6" },
   { title: "Reviews", description: "Manage customer reviews", icon: <ReviewsIcon sx={{ fontSize: 32, color: "#f59e0b" }} />, href: "/admin/reviews", bg: "linear-gradient(135deg, #fffbeb, #fef3c7)", chipLabel: "Feedback", chipColor: "#f59e0b" },
 ];
@@ -40,19 +40,20 @@ export default function AdminDashboard() {
   }, []);
 
   const cards = [
-    { label: "Total Products", value: stats?.products ?? "—", icon: "🧁", color: "#ec4899" },
-    { label: "Total Orders", value: stats?.orders ?? "—", icon: "📦", color: "#8b5cf6" },
+    { label: "Total Products", value: stats?.products ?? "—", icon: "🧁", color: "#d97a9c" },
+    { label: "Total Orders", value: stats?.orders ?? "—", icon: "📦", color: "#9b7bd0" },
     { label: "Customers", value: stats?.customers ?? "—", icon: "👥", color: "#3b82f6" },
     { label: "Revenue", value: stats ? `₹${stats.revenue.toFixed(0)}` : "—", icon: "💰", color: "#10b981" },
   ];
 
   return (
     <AdminShell title="Dashboard">
-      <Box sx={{ background: "linear-gradient(135deg, #be185d, #7c3aed)", color: "white", borderRadius: 4, p: 4, mb: 4, position: "relative", overflow: "hidden" }}>
-        <Box sx={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", bgcolor: alpha("#fff", 0.06) }} />
-        <Typography variant="h4" fontWeight={800}>Welcome back, Admin! 🧁</Typography>
-        <Typography sx={{ opacity: 0.85, mt: 0.5 }}>Here&apos;s what&apos;s happening at Bindi&apos;s Cupcakery today</Typography>
-        <Chip icon={<TrendIcon sx={{ color: "white !important" }} />} label="Live data from database" sx={{ mt: 2, color: "white", bgcolor: alpha("#fff", 0.2), fontWeight: 700 }} />
+      <Box sx={{ background: "linear-gradient(135deg, #fce8f0 0%, #f5ebe0 50%, #ede4f6 100%)", color: "#5b3a52", borderRadius: 4, p: 4, mb: 4, position: "relative", overflow: "hidden", border: "1px solid", borderColor: alpha("#d4a373", 0.18) }}>
+        <Box sx={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", bgcolor: alpha("#f9c2d6", 0.25) }} />
+        <Box sx={{ position: "absolute", bottom: -30, left: 100, width: 140, height: 140, borderRadius: "50%", bgcolor: alpha("#d4b5e8", 0.2) }} />
+        <Typography variant="h4" fontWeight={800} sx={{ color: "#9d4870" }}>Welcome back, Admin 🧁</Typography>
+        <Typography sx={{ opacity: 0.75, mt: 0.5, color: "#5b3a52" }}>Here&apos;s what&apos;s happening at Bindi&apos;s Cupcakery today</Typography>
+        <Chip icon={<TrendIcon sx={{ color: "#9d4870 !important" }} />} label="Live data from database" sx={{ mt: 2, color: "#9d4870", bgcolor: alpha("#fff", 0.6), fontWeight: 700, border: "1px solid", borderColor: alpha("#9d4870", 0.15) }} />
       </Box>
 
       <Grid container spacing={3} mb={5}>
