@@ -13,7 +13,7 @@ export async function DELETE(req: NextRequest, ctx: Ctx) {
     const id = parseInt(idStr);
     await prisma.review.delete({ where: { id } });
     return NextResponse.json({ message: "Review deleted" });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Error", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error", error: (error as Error).message }, { status: 500 });
   }
 }

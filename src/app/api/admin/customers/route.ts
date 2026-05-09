@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       totalSpent: c.orders.reduce((s, o) => s + o.total, 0),
     }));
     return NextResponse.json({ customers: enriched });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Error", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error", error: (error as Error).message }, { status: 500 });
   }
 }

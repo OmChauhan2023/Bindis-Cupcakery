@@ -13,12 +13,12 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newAdmin = await prisma.admin.create({
+    await prisma.admin.create({
       data: { username, password: hashedPassword, role }
     });
 
     return NextResponse.json({ message: "Admin created successfully" }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating admin:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }

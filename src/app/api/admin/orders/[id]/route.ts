@@ -17,8 +17,8 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
       data: { status },
     });
     return NextResponse.json({ order: updated });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Error", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error", error: (error as Error).message }, { status: 500 });
   }
 }
 
@@ -31,7 +31,7 @@ export async function DELETE(req: NextRequest, ctx: Ctx) {
     const id = parseInt(idStr);
     await prisma.order.delete({ where: { id } });
     return NextResponse.json({ message: "Order deleted" });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Error", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error", error: (error as Error).message }, { status: 500 });
   }
 }

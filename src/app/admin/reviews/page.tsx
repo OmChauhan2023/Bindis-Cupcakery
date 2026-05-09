@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  Box, Paper, Typography, Avatar, Chip, IconButton, CircularProgress,
+  Box, Paper, Typography, Avatar, IconButton, CircularProgress,
   Grid, alpha,
 } from "@mui/material";
 import { Star as StarIcon, Delete as DeleteIcon } from "@mui/icons-material";

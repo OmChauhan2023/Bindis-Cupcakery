@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -11,7 +11,6 @@ import {
   Typography,
   Grid,
   Card,
-  CardMedia,
   CardContent,
   CardActions,
   Button,
@@ -29,15 +28,12 @@ import {
   Skeleton,
   alpha,
   Tooltip,
-  Badge,
-  Divider,
   Select,
   MenuItem,
   InputAdornment,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
-  Rating,
 } from "@mui/material"
 import {
   ShoppingCart as CartIcon,
@@ -47,7 +43,6 @@ import {
   Remove as RemoveIcon,
   Edit as EditIcon,
   Close as CloseIcon,
-  LocalOffer as TagIcon,
   Search as SearchIcon,
   Sort as SortIcon,
   GridView as GridIcon,
@@ -72,10 +67,10 @@ interface CustomizationOptions {
 }
 
 export default function ProductPage() {
-  const { cart, addToCart } = useCart()
+  const { addToCart } = useCart()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const [error, setError] = useState<string>("")
   const [quantities, setQuantities] = useState<{ [key: number]: number }>({})
   const [wishlist, setWishlist] = useState<Set<number>>(new Set())
   const [customizationModal, setCustomizationModal] = useState<{ isOpen: boolean; productId: number | null }>({
@@ -102,7 +97,7 @@ export default function ProductPage() {
           return acc
         }, {})
         setQuantities(initialQuantities)
-      } catch (error) {
+      } catch {
         setError("Failed to load products. Please try again.")
       } finally {
         setLoading(false)
@@ -139,7 +134,8 @@ export default function ProductPage() {
   const toggleWishlist = (id: number) => {
     setWishlist((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
       return next
     })
   }
@@ -253,7 +249,7 @@ export default function ProductPage() {
             <Select
               size="small"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               startAdornment={<InputAdornment position="start"><SortIcon sx={{ fontSize: 18 }} /></InputAdornment>}
               sx={{ minWidth: 170, borderRadius: 50, "& .MuiOutlinedInput-notchedOutline": { borderRadius: 50 } }}
             >

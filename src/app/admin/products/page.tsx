@@ -22,7 +22,8 @@ interface Product {
   category?: string;
 }
 
-const empty = { name: "", description: "", price: "", image: "" };
+type ProductForm = { name: string; description: string; price: string; image: string };
+const empty: ProductForm = { name: "", description: "", price: "", image: "" };
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -30,7 +31,7 @@ export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
-  const [form, setForm] = useState<any>(empty);
+  const [form, setForm] = useState<ProductForm>(empty);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 

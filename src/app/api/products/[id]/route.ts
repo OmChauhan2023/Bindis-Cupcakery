@@ -19,8 +19,8 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
       return NextResponse.json({ message: "Product not found" }, { status: 404 });
     }
     return NextResponse.json({ product }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Server error", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Server error", error: (error as Error).message }, { status: 500 });
   }
 }
 
@@ -45,8 +45,8 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
       },
     });
     return NextResponse.json({ message: "Product updated", product: updated }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Error updating product", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error updating product", error: (error as Error).message }, { status: 500 });
   }
 }
 
@@ -62,7 +62,7 @@ export async function DELETE(req: NextRequest, ctx: Ctx) {
     }
     await prisma.product.delete({ where: { id: productId } });
     return NextResponse.json({ message: "Product deleted" }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ message: "Error deleting product", error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error deleting product", error: (error as Error).message }, { status: 500 });
   }
 }

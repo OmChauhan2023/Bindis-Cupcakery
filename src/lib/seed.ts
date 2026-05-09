@@ -25,7 +25,12 @@ export async function ensureSeeded() {
   const count = await prisma.product.count();
   if (count > 0) return;
   await prisma.product.createMany({
-    data: SEED_PRODUCTS.map(({ category, ...p }) => p),
+    data: SEED_PRODUCTS.map((p) => ({
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      image: p.image,
+    })),
   });
 }
 

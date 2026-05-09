@@ -9,9 +9,9 @@ export async function GET() {
     const products = await prisma.product.findMany({ orderBy: { id: "asc" } });
     const enriched = products.map((p) => ({ ...p, category: categoryFor(p.name) }));
     return NextResponse.json({ products: enriched }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching products:", error);
-    return NextResponse.json({ message: "Server error", error: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Server error", error: (error as Error).message }, { status: 500 });
   }
 }
 
@@ -27,10 +27,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: "No products to add" }, { status: 400 });
       }
       const saved = await prisma.product.createMany({
-        data: data.map((item: any) => ({
+        data: (data as Array<{ name: string; description: string; price: string | number; image: string }>).map((item) => ({
           name: item.name,
           description: item.description,
-          price: parseFloat(item.price),
+          price: parseFloat(String(item.price)),
           image: item.image,
         })),
       });
@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
       data: { name, description, price: parseFloat(price), image },
     });
     return NextResponse.json({ message: "Product added", product: newProduct }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error adding product:", error);
-    return NextResponse.json({ message: "Error adding product", error: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Error adding product", error: (error as Error).message }, { status: 500 });
   }
 }
