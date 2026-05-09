@@ -25,6 +25,8 @@ import {
   People as UsersIcon,
   Star as ReviewsIcon,
   Logout as LogoutIcon,
+  Storefront as StorefrontIcon,
+  OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
 
 const NAV = [
@@ -127,7 +129,29 @@ export default function AdminShell({ children, title }: { children: React.ReactN
           })}
         </List>
         <Box sx={{ flex: 1 }} />
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ px: 2, pb: 1 }}>
+          <Divider sx={{ borderColor: alpha("#d4a373", 0.12), mb: 1.5 }} />
+          <Button
+            fullWidth
+            component={Link}
+            href="/"
+            startIcon={<StorefrontIcon />}
+            endIcon={<OpenInNewIcon sx={{ fontSize: 14 }} />}
+            sx={{
+              color: "text.secondary",
+              borderRadius: 2,
+              justifyContent: "flex-start",
+              textTransform: "none",
+              fontWeight: 600,
+              mb: 1,
+              px: 1.5,
+              "&:hover": { bgcolor: alpha("#f9c2d6", 0.18), color: "#9d4870" },
+            }}
+          >
+            View Site
+          </Button>
+        </Box>
+        <Box sx={{ px: 2, pb: 2 }}>
           <Button
             fullWidth
             startIcon={<LogoutIcon />}

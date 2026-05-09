@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Box,
-  
   Typography,
   TextField,
   Button,
@@ -20,6 +20,7 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Login as LoginIcon,
+  ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material";
 
 export default function AdminLogin() {
@@ -67,6 +68,24 @@ export default function AdminLogin() {
       }}
     >
       <Box sx={{ width: "100%", maxWidth: 420 }}>
+        {/* Back to Home */}
+        <Button
+          component={Link}
+          href="/"
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            color: "#9d4870",
+            textTransform: "none",
+            fontWeight: 600,
+            mb: 2,
+            px: 1.5,
+            borderRadius: 2,
+            "&:hover": { bgcolor: alpha("#f9c2d6", 0.2) },
+          }}
+        >
+          Back to Home
+        </Button>
+
         {/* Logo / Brand */}
         <Box textAlign="center" mb={4}>
           <Box

@@ -105,32 +105,16 @@ export default function GalleryPage() {
       {/* ── Hero Header ─────────────────────────────────── */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #be185d 0%, #7c3aed 100%)",
+          background: "linear-gradient(135deg, #fce7f3 0%, #f5f3ff 50%, #fce7f3 100%)",
           py: { xs: 8, md: 12 },
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* Decorative rings */}
-        {[
-          { size: 240, top: -60, left: "8%", opacity: 0.12 },
-          { size: 180, bottom: -50, right: "10%", opacity: 0.1 },
-          { size: 120, top: "30%", right: "25%", opacity: 0.07 },
-        ].map(({ size, opacity, ...pos }, i) => (
-          <Box
-            key={i}
-            sx={{
-              position: "absolute",
-              ...pos,
-              width: size,
-              height: size,
-              borderRadius: "50%",
-              border: `1px solid ${alpha("#fff", opacity)}`,
-              pointerEvents: "none",
-            }}
-          />
-        ))}
+        {/* Decorative blurred blobs */}
+        <Box sx={{ position: "absolute", top: -60, left: -60, width: 250, height: 250, borderRadius: "50%", background: alpha("#ec4899", 0.12), filter: "blur(50px)" }} />
+        <Box sx={{ position: "absolute", bottom: -60, right: -60, width: 250, height: 250, borderRadius: "50%", background: alpha("#8b5cf6", 0.12), filter: "blur(50px)" }} />
 
         <Container maxWidth="md" sx={{ position: "relative", zIndex: 1 }}>
           <Box
@@ -138,9 +122,9 @@ export default function GalleryPage() {
               display: "inline-flex",
               alignItems: "center",
               gap: 1,
-              bgcolor: alpha("#fff", 0.12),
+              bgcolor: alpha("#fff", 0.7),
               border: "1px solid",
-              borderColor: alpha("#fff", 0.25),
+              borderColor: alpha("#ec4899", 0.2),
               borderRadius: "50px",
               px: 2.5,
               py: 0.8,
@@ -148,10 +132,10 @@ export default function GalleryPage() {
               backdropFilter: "blur(10px)",
             }}
           >
-            <CameraIcon sx={{ color: alpha("#fff", 0.85), fontSize: 18 }} />
+            <CameraIcon sx={{ color: "primary.main", fontSize: 18 }} />
             <Typography
               variant="caption"
-              sx={{ color: alpha("#fff", 0.85), fontWeight: 700, letterSpacing: 2 }}
+              sx={{ color: "primary.main", fontWeight: 700, letterSpacing: 2 }}
             >
               OUR GALLERY
             </Typography>
@@ -159,16 +143,23 @@ export default function GalleryPage() {
 
           <Typography
             variant="h2"
-            fontWeight={900}
-            color="white"
-            mb={2}
-            sx={{ fontSize: { xs: "2rem", md: "3.2rem" }, lineHeight: 1.15 }}
+            component="h1"
+            fontWeight={800}
+            sx={{
+              background: "linear-gradient(135deg, #be185d, #7c3aed)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontSize: { xs: "2rem", md: "3.2rem" },
+              lineHeight: 1.15,
+              mb: 2,
+            }}
           >
             A Feast for the Eyes 📸
           </Typography>
           <Typography
-            color={alpha("#fff", 0.78)}
-            sx={{ fontSize: { xs: "1rem", md: "1.15rem" }, maxWidth: 500, mx: "auto", lineHeight: 1.8 }}
+            variant="h6"
+            color="text.secondary"
+            sx={{ maxWidth: 540, mx: "auto", lineHeight: 1.8 }}
           >
             Browse our collection of handcrafted creations — each made with love and the finest ingredients.
           </Typography>
