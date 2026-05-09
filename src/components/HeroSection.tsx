@@ -8,6 +8,7 @@ import {
   ArrowForward as ArrowForwardIcon,
   Star as StarIcon,
 } from "@mui/icons-material";
+import { CONTACT_WHATSAPP_URL } from "@/lib/contact";
 
 export default function HeroSection() {
   return (
@@ -104,7 +105,7 @@ export default function HeroSection() {
                   variant="contained"
                   size="large"
                   startIcon={<WhatsAppIcon />}
-                  href="https://wa.me/918849130189"
+                  href={CONTACT_WHATSAPP_URL}
                   target="_blank"
                   sx={{
                     bgcolor: "#25d366",

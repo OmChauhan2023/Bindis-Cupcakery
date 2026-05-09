@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import {
   Box,
@@ -13,16 +13,24 @@ import {
   alpha,
   Alert,
   Collapse,
+  MenuItem,
+  CircularProgress,
 } from "@mui/material"
 import { Star as StarIcon, StarBorder as StarBorderIcon, Send as SendIcon } from "@mui/icons-material"
 
-const initialReviews = [
-  { id: 1, name: "Hrithik", rating: 5, comment: "The cupcakes were absolutely delicious! Will definitely order again." },
-  { id: 2, name: "Abhishek", rating: 4, comment: "Great variety of flavors. The ice cream was a hit at our party." },
-  { id: 3, name: "Kshitij", rating: 5, comment: "The best eggless cakes I've ever had. Highly recommended!" },
-  { id: 4, name: "Akshat", rating: 5, comment: "Ordered a custom cake for my daughter's birthday. It was perfect!" },
-  { id: 5, name: "Jaimin", rating: 5, comment: "Their service and quality is the best, and they maintain very good hygiene." },
-]
+interface Product {
+  id: number
+  name: string
+}
+
+interface Review {
+  id: number
+  rating: number
+  comment: string
+  createdAt: string
+  user: { name: string }
+  product: { name: string }
+}
 
 const avatarColors = [
   "linear-gradient(135deg, #ec4899, #f472b6)",
@@ -57,25 +65,73 @@ function StarRating({ rating, setRating }: { rating: number; setRating?: (v: num
 }
 
 export default function Reviews() {
-  const [reviews, setReviews] = useState(initialReviews)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [productId, setProductId] = useState<number | "">("")
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [loadingReviews, setLoadingReviews] = useState(true)
 
-  const handleSubmit = () => {
-    if (!name.trim() || !comment.trim() || rating === 0) {
-      setError("Please fill out all fields and select a rating.")
+  const loadReviews = async () => {
+    try {
+      const r = await fetch("/api/reviews")
+      const d = await r.json()
+      setReviews(d.reviews || [])
+    } finally {
+      setLoadingReviews(false)
+    }
+  }
+
+  useEffect(() => {
+    loadReviews()
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((d) => setProducts(d.products || []))
+      .catch(() => {})
+  }, [])
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !comment.trim() || rating === 0 || !productId) {
+      setError("Please fill out all fields, pick a product, and select a rating.")
       return
     }
-    setReviews([{ id: Date.now(), name, rating, comment }, ...reviews])
-    setSuccess(true)
-    setName("")
-    setRating(0)
-    setComment("")
+    setSubmitting(true)
     setError("")
-    setTimeout(() => setSuccess(false), 3000)
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim() || undefined,
+          productId,
+          rating,
+          comment: comment.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.message || "Could not submit review")
+        return
+      }
+      setSuccess(true)
+      setName("")
+      setEmail("")
+      setProductId("")
+      setRating(0)
+      setComment("")
+      loadReviews()
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
+      setError((err as Error).message || "Network error")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -88,7 +144,6 @@ export default function Reviews() {
       }}
     >
       <Container maxWidth="lg">
-        {/* Header */}
         <Box textAlign="center" mb={8}>
           <Typography variant="overline" sx={{ color: "primary.main", letterSpacing: 4, fontWeight: 700 }}>
             our community
@@ -142,6 +197,26 @@ export default function Reviews() {
               />
               <TextField
                 fullWidth
+                label="Email (optional)"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+              <TextField
+                fullWidth
+                select
+                label="What did you order?"
+                value={productId}
+                onChange={(e) => setProductId(Number(e.target.value))}
+                sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              >
+                {products.map((p) => (
+                  <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                fullWidth
                 label="Your Experience"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -168,78 +243,98 @@ export default function Reviews() {
                 variant="contained"
                 size="large"
                 onClick={handleSubmit}
-                endIcon={<SendIcon />}
+                disabled={submitting}
+                endIcon={submitting ? <CircularProgress size={18} sx={{ color: "white" }} /> : <SendIcon />}
                 sx={{
                   borderRadius: "50px",
                   py: 1.5,
                   fontWeight: 700,
-                  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                  boxShadow: "0 6px 20px rgba(236,72,153,0.35)",
+                  background: "linear-gradient(135deg, #d97a9c, #9b7bd0)",
+                  boxShadow: "0 6px 20px rgba(217,122,156,0.28)",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                    background: "linear-gradient(135deg, #c2628a, #8568b8)",
                     transform: "translateY(-2px)",
                   },
                   transition: "all 0.3s",
                 }}
               >
-                Submit Review
+                {submitting ? "Posting…" : "Submit Review"}
               </Button>
             </Paper>
           </Grid>
 
           {/* Reviews List */}
           <Grid item xs={12} md={8}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {reviews.map((review, index) => (
-                <motion.div
-                  key={review.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.06, duration: 0.4 }}
-                >
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      borderRadius: 4,
-                      p: 4,
-                      border: "1px solid",
-                      borderColor: "divider",
-                      background: "white",
-                      transition: "all 0.3s",
-                      "&:hover": {
-                        boxShadow: "0 12px 40px rgba(236,72,153,0.12)",
-                        transform: "translateY(-3px)",
-                        borderColor: alpha("#ec4899", 0.25),
-                      },
-                    }}
+            {loadingReviews ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                <CircularProgress />
+              </Box>
+            ) : reviews.length === 0 ? (
+              <Paper elevation={0} sx={{ p: 6, textAlign: "center", borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
+                <Typography sx={{ fontSize: "3rem", mb: 1 }}>⭐</Typography>
+                <Typography variant="h6" fontWeight={700}>Be the first to review!</Typography>
+                <Typography variant="body2" color="text.secondary" mt={1}>
+                  Share what you loved about your order — your words help others discover their favourites.
+                </Typography>
+              </Paper>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {reviews.map((review, index) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.06, duration: 0.4 }}
                   >
-                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2.5 }}>
-                      <Avatar
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          background: avatarColors[index % avatarColors.length],
-                          fontWeight: 700,
-                          fontSize: "1.2rem",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {review.name[0]}
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-                          <Typography fontWeight={700}>{review.name}</Typography>
-                          <StarRating rating={review.rating} />
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        borderRadius: 4,
+                        p: 4,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        background: "white",
+                        transition: "all 0.3s",
+                        "&:hover": {
+                          boxShadow: "0 12px 40px rgba(217,122,156,0.12)",
+                          transform: "translateY(-3px)",
+                          borderColor: alpha("#d97a9c", 0.25),
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2.5 }}>
+                        <Avatar
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            background: avatarColors[index % avatarColors.length],
+                            fontWeight: 700,
+                            fontSize: "1.2rem",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {review.user.name[0]}
+                        </Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.3, flexWrap: "wrap", gap: 1 }}>
+                            <Box>
+                              <Typography fontWeight={700}>{review.user.name}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                on <strong>{review.product.name}</strong>
+                              </Typography>
+                            </Box>
+                            <StarRating rating={review.rating} />
+                          </Box>
+                          <Typography variant="body1" color="text.secondary" lineHeight={1.8} fontStyle="italic" mt={1}>
+                            &quot;{review.comment}&quot;
+                          </Typography>
                         </Box>
-                        <Typography variant="body1" color="text.secondary" lineHeight={1.8} fontStyle="italic">
-                          &quot;{review.comment}&quot;
-                        </Typography>
                       </Box>
-                    </Box>
-                  </Paper>
-                </motion.div>
-              ))}
-            </Box>
+                    </Paper>
+                  </motion.div>
+                ))}
+              </Box>
+            )}
           </Grid>
         </Grid>
       </Container>

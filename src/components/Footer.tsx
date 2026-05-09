@@ -19,6 +19,7 @@ import {
   LocationOn as MapPin,
   Phone
 } from "@mui/icons-material"
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/lib/contact"
 
 export function Footer() {
   const theme = useTheme()
@@ -44,18 +45,11 @@ export function Footer() {
                 <Phone color="primary" />
                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <MuiLink
-                    href="tel:+918849130189"
+                    href={CONTACT_PHONE_TEL}
                     color="text.secondary"
                     sx={{ textDecoration: "none", "&:hover": { color: "primary.main" } }}
                   >
-                    +91 88491-30189
-                  </MuiLink>
-                  <MuiLink
-                    href="tel:+919978677790"
-                    color="text.secondary"
-                    sx={{ textDecoration: "none", "&:hover": { color: "primary.main" } }}
-                  >
-                    +91 99786-77790
+                    {CONTACT_PHONE_DISPLAY}
                   </MuiLink>
                 </Box>
               </Box>

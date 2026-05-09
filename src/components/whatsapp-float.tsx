@@ -2,11 +2,12 @@
 
 import { PhoneIcon as WhatsappIcon } from "lucide-react";
 import Link from "next/link";
+import { CONTACT_WHATSAPP_URL } from "@/lib/contact";
 
 export default function WhatsAppFloat() {
   return (
     <Link
-      href="https://wa.me/918849130189"
+      href={CONTACT_WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

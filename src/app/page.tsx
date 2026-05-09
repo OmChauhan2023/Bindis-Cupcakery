@@ -27,6 +27,7 @@ import {
   EmojiEvents as TrophyIcon,
   WhatsApp as WhatsAppIcon,
 } from "@mui/icons-material";
+import { CONTACT_WHATSAPP_URL } from "@/lib/contact";
 
 const features = [
   {
@@ -634,7 +635,7 @@ export default function Home() {
               variant="contained"
               size="large"
               startIcon={<WhatsAppIcon />}
-              href="https://wa.me/918849130189"
+              href={CONTACT_WHATSAPP_URL}
               target="_blank"
               sx={{
                 bgcolor: "#25d366",

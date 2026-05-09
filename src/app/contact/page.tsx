@@ -21,6 +21,7 @@ import {
   Send as SendIcon,
 } from "@mui/icons-material"
 import { motion } from "framer-motion"
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL, CONTACT_WHATSAPP_URL } from "@/lib/contact"
 
 const contactItems = [
   {
@@ -34,8 +35,8 @@ const contactItems = [
   {
     icon: <PhoneIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />,
     label: "Call Us",
-    value: "+91 88491-30189",
-    href: "tel:+918849130189",
+    value: CONTACT_PHONE_DISPLAY,
+    href: CONTACT_PHONE_TEL,
     bg: "rgba(245, 243, 255, 0.4)",
     border: "rgba(139,92,246,0.2)",
   },
@@ -180,7 +181,7 @@ export default function Contact() {
                   <Button
                     variant="contained"
                     startIcon={<WhatsAppIcon />}
-                    href="https://wa.me/918849130189"
+                    href={CONTACT_WHATSAPP_URL}
                     target="_blank"
                     sx={{
                       bgcolor: "white",

@@ -62,6 +62,7 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   price     Float
+  notes     String?
 }
 
 model Review {

@@ -15,12 +15,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  
-  
-  
-  
-  
+  Alert,
+  CircularProgress,
   alpha,
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   Person as PersonIcon,
@@ -41,32 +39,70 @@ const CheckoutPage = () => {
     paymentMethod: "UPI",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const total = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
-    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | SelectChangeEvent<string>
+  ) => {
+    const { name, value } = e.target as { name: string; value: string };
+    setUserDetails({ ...userDetails, [name]: value });
+    if (errors[name]) setErrors({ ...errors, [name]: "" });
+    if (serverError) setServerError("");
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!userDetails.name.trim()) newErrors.name = "Name is required";
     if (!userDetails.email.trim()) newErrors.email = "Email is required";
+    else if (!/^\S+@\S+\.\S+$/.test(userDetails.email)) newErrors.email = "Invalid email";
     if (!userDetails.phone.trim()) newErrors.phone = "Phone is required";
     if (!userDetails.address.trim()) newErrors.address = "Address is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleOrder = () => {
+  const handleOrder = async () => {
     if (!validate()) return;
-    console.log("🛒 Order Placed:", { userDetails, cart });
-    router.push("/cart/confirmation");
-    setTimeout(() => clearCart(), 1000);
+    setSubmitting(true);
+    setServerError("");
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: {
+            name: userDetails.name.trim(),
+            email: userDetails.email.trim(),
+            phone: userDetails.phone.trim(),
+          },
+          deliveryAddress: userDetails.address.trim(),
+          paymentMethod: userDetails.paymentMethod,
+          items: cart.map((c) => ({
+            id: c.id,
+            qty: c.qty,
+            price: c.price,
+            customizations: c.customizations,
+            note: c.note,
+          })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setServerError(data.message || "Could not place order");
+        setSubmitting(false);
+        return;
+      }
+      router.push(`/cart/confirmation?orderId=${data.orderId}`);
+      setTimeout(() => clearCart(), 800);
+    } catch (err) {
+      setServerError((err as Error).message || "Network error");
+      setSubmitting(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -230,28 +266,34 @@ const CheckoutPage = () => {
                 </Typography>
               </Box>
 
+              {serverError && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                  {serverError}
+                </Alert>
+              )}
               <Button
                 fullWidth
                 variant="contained"
                 size="large"
                 onClick={handleOrder}
-                startIcon={<CheckIcon />}
+                disabled={submitting}
+                startIcon={submitting ? <CircularProgress size={18} sx={{ color: "white" }} /> : <CheckIcon />}
                 sx={{
                   borderRadius: "50px",
                   py: 1.8,
                   fontWeight: 700,
                   fontSize: "1rem",
-                  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                  boxShadow: "0 8px 30px rgba(236,72,153,0.35)",
+                  background: "linear-gradient(135deg, #d97a9c, #9b7bd0)",
+                  boxShadow: "0 8px 24px rgba(217,122,156,0.28)",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                    background: "linear-gradient(135deg, #c2628a, #8568b8)",
                     transform: "translateY(-2px)",
-                    boxShadow: "0 12px 40px rgba(236,72,153,0.45)",
+                    boxShadow: "0 12px 32px rgba(217,122,156,0.35)",
                   },
                   transition: "all 0.3s",
                 }}
               >
-                Place Order
+                {submitting ? "Placing order…" : "Place Order"}
               </Button>
 
               <Box sx={{ mt: 2, p: 2, bgcolor: alpha("#ec4899", 0.04), borderRadius: 3 }}>
