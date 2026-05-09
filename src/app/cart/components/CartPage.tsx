@@ -31,24 +31,27 @@ import {
 import { useState } from "react";
 
 const CartPage = () => {
-  const { cart, updateQuantity, removeFromCart } = useCart();
-  const [promo, setPromo] = useState("");
-  const [promoStatus, setPromoStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const { cart, updateQuantity, removeFromCart, promo, applyPromo, clearPromo } = useCart();
+  const [promoInput, setPromoInput] = useState(promo?.code || "");
+  const [promoStatus, setPromoStatus] = useState<{ ok: boolean; msg: string } | null>(
+    promo ? { ok: true, msg: `🎉 ${promo.label} applied!` } : null
+  );
 
   const subtotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
-  const discount = promoStatus?.ok ? Math.round(subtotal * 0.1) : 0;
+  const discount = promo ? Math.round(subtotal * (promo.percent / 100)) : 0;
   const deliveryFee = subtotal > 500 ? 0 : subtotal > 0 ? 40 : 0;
   const total = Math.max(0, subtotal - discount + deliveryFee);
 
-  const applyPromo = () => {
-    const code = promo.trim().toUpperCase();
-    if (!code) return;
-    if (code === "BINDI10" || code === "FIRST10") {
-      setPromoStatus({ ok: true, msg: "🎉 10% off applied!" });
-    } else {
-      setPromoStatus({ ok: false, msg: "Invalid code. Try BINDI10" });
+  const handleApply = () => {
+    const code = promoInput.trim();
+    if (!code) {
+      clearPromo();
+      setPromoStatus(null);
+      return;
     }
+    const result = applyPromo(code);
+    setPromoStatus({ ok: result.ok, msg: result.message });
   };
 
   if (cart.length === 0) {
@@ -282,15 +285,15 @@ const CartPage = () => {
                   <TextField
                     size="small"
                     placeholder="Promo code"
-                    value={promo}
-                    onChange={(e) => { setPromo(e.target.value); setPromoStatus(null) }}
+                    value={promoInput}
+                    onChange={(e) => { setPromoInput(e.target.value); setPromoStatus(null) }}
                     sx={{ flex: 1, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                     InputProps={{
                       startAdornment: <OfferIcon sx={{ fontSize: 18, color: "text.disabled", mr: 1 }} />,
                     }}
                   />
                   <Button
-                    onClick={applyPromo}
+                    onClick={handleApply}
                     variant="outlined"
                     sx={{
                       borderRadius: 2,

@@ -25,10 +25,12 @@ import {
   CreditCard as PaymentIcon,
   CheckCircle as CheckIcon,
   ShoppingBag as BagIcon,
+  LocalOffer as OfferIcon,
 } from "@mui/icons-material";
+import Chip from "@mui/material/Chip";
 
 const CheckoutPage = () => {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, promo } = useCart();
   const router = useRouter();
 
   const [userDetails, setUserDetails] = useState({
@@ -42,7 +44,10 @@ const CheckoutPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  const total = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const discount = promo ? Math.round(subtotal * (promo.percent / 100)) : 0;
+  const deliveryFee = subtotal > 500 ? 0 : subtotal > 0 ? 40 : 0;
+  const total = Math.max(0, subtotal - discount + deliveryFee);
 
   const handleChange = (
     e:
@@ -82,6 +87,7 @@ const CheckoutPage = () => {
           },
           deliveryAddress: userDetails.address.trim(),
           paymentMethod: userDetails.paymentMethod,
+          promoCode: promo?.code,
           items: cart.map((c) => ({
             id: c.id,
             qty: c.qty,
@@ -241,7 +247,7 @@ const CheckoutPage = () => {
               </Box>
 
               {cart.map((item) => (
-                <Box key={item.id} sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
+                <Box key={item.cartKey || item.id} sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
                   <Typography color="text.secondary" sx={{ flex: 1, mr: 1 }} noWrap>
                     {item.name} <Typography component="span" variant="caption" sx={{ color: "text.disabled" }}>×{item.qty}</Typography>
                   </Typography>
@@ -249,6 +255,31 @@ const CheckoutPage = () => {
                 </Box>
               ))}
 
+              <Divider sx={{ my: 2 }} />
+
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                <Typography color="text.secondary">Subtotal</Typography>
+                <Typography fontWeight={600}>₹{subtotal.toFixed(0)}</Typography>
+              </Box>
+              {promo && discount > 0 && (
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, alignItems: "center" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <OfferIcon sx={{ fontSize: 16, color: "#059669" }} />
+                    <Typography sx={{ color: "#059669" }}>
+                      Promo <Chip label={promo.code} size="small" sx={{ height: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: alpha("#10b981", 0.12), color: "#059669", ml: 0.5 }} />
+                    </Typography>
+                  </Box>
+                  <Typography fontWeight={700} sx={{ color: "#059669" }}>− ₹{discount}</Typography>
+                </Box>
+              )}
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
+                <Typography color="text.secondary">Delivery</Typography>
+                {deliveryFee === 0 ? (
+                  <Chip label="FREE" size="small" sx={{ bgcolor: alpha("#10b981", 0.12), color: "#059669", fontWeight: 700 }} />
+                ) : (
+                  <Typography fontWeight={600}>₹{deliveryFee}</Typography>
+                )}
+              </Box>
               <Divider sx={{ my: 2 }} />
 
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>

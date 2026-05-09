@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { lookupPromo } from "@/lib/promo";
 
 export interface CartCustomization {
   label: string;
@@ -18,12 +19,21 @@ export interface CartItem {
   note?: string;
 }
 
+export interface AppliedPromo {
+  code: string;
+  percent: number;
+  label: string;
+}
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
   updateQuantity: (cartKey: string, qty: number) => void;
   removeFromCart: (cartKey: string) => void;
   clearCart: () => void;
+  promo: AppliedPromo | null;
+  applyPromo: (code: string) => { ok: boolean; message: string };
+  clearPromo: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -38,6 +48,7 @@ function buildCartKey(item: CartItem): string {
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [promo, setPromo] = useState<AppliedPromo | null>(null);
 
   const addToCart = (item: CartItem) => {
     const cartKey = buildCartKey(item);
@@ -64,10 +75,36 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart((prev) => prev.filter((item) => item.cartKey !== cartKey));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    setPromo(null);
+  };
+
+  const applyPromo = (code: string) => {
+    const found = lookupPromo(code);
+    if (!found) {
+      setPromo(null);
+      return { ok: false, message: "Invalid code. Try BINDI10" };
+    }
+    setPromo({ code: found.code, percent: found.percent, label: found.label });
+    return { ok: true, message: `🎉 ${found.label} applied!` };
+  };
+
+  const clearPromo = () => setPromo(null);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        promo,
+        applyPromo,
+        clearPromo,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
