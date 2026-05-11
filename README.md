@@ -1,116 +1,219 @@
-# 🪷 BINDIS — Sweet Shop & Bakery Web App
+# Bindi's Cupcakery
 
-A modern, full-stack web application for **Bindis** — a sweet shop and bakery platform built with **Next.js 15**, **TypeScript**, **Firebase**, and **Tailwind CSS**. Designed to deliver a seamless and delightful shopping experience for traditional Indian sweets and baked goods.
+A full-stack e-commerce web app for **Bindi's Cupcakery** — a Surat-based bakery selling cupcakes, cakes, desserts, and gift boxes. Built with Next.js 15, Prisma, SQLite, and Material UI.
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| **Framework** | Next.js 15 (App Router + Turbopack) |
-| **Language** | TypeScript |
-| **Styling** | Tailwind CSS, Framer Motion |
-| **UI Components** | Radix UI, shadcn/ui, Lucide React |
-| **Auth & Storage** | Firebase |
-| **Database** | MongoDB (via Mongoose) |
-| **Package Manager** | npm |
+| Framework | Next.js 15 (App Router + Turbopack) |
+| Language | TypeScript |
+| UI Library | Material UI (MUI) v5 |
+| Animations | Framer Motion |
+| ORM | Prisma 7 |
+| Database | SQLite (via `@prisma/adapter-better-sqlite3`) |
+| Auth | JWT (`jsonwebtoken` + `bcryptjs`) stored in cookie |
+| Package Manager | npm |
 
 ---
 
-## ✨ Features
+## Pages
 
-- 🛍️ **Product Catalog** — Browse a rich collection of sweets and bakery items
-- 🔥 **Firebase Integration** — Real-time data and authentication support
-- 🗄️ **MongoDB Backend** — Scalable data storage with Mongoose ODM
-- 🎨 **Smooth Animations** — Powered by Framer Motion for a polished UI
-- 📱 **Fully Responsive** — Mobile-first design using Tailwind CSS
-- ⚡ **Turbopack** — Blazing-fast development builds with Next.js 15
+### Public
+
+| Route | Description |
+|---|---|
+| `/` | Landing page — hero, featured products, testimonials, about snippet |
+| `/products` | Full product catalog with search, category filter, sort, and grid/list toggle. Clicking any product opens a Quick View modal. |
+| `/cart` | Shopping cart — line items with customization chips, quantity controls, promo code field, delivery fee logic, order summary |
+| `/cart/checkout` | Checkout form — customer details, payment method selector, live order summary with promo + delivery breakdown |
+| `/cart/confirmation` | Post-order confirmation page |
+| `/review` | Public review form — product dropdown, star rating, comment; shows all published reviews |
+| `/gallery` | Photo gallery with hero section and image grid |
+| `/contact` | Contact page with WhatsApp link, phone, and location |
+
+### Admin (protected)
+
+| Route | Description |
+|---|---|
+| `/admin/login` | Admin login — JWT cookie set on success |
+| `/admin/dashboard` | Live dashboard — stat cards (orders, revenue, customers, products), recent orders, recent reviews, top products by units sold, catalog breakdown by category, quick-action buttons |
+| `/admin/products` | Product management — add, edit, delete products |
+| `/admin/orders` | Order management — view all orders with status |
+| `/admin/customers` | Customer list pulled from DB |
+| `/admin/reviews` | Review moderation — approve / delete |
+
+Admin pages are wrapped by `AdminShell` which guards against unauthenticated access by reading the `adminToken` cookie client-side, and all admin API routes verify the JWT server-side.
 
 ---
 
-## 📁 Project Structure
+## API Routes
+
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/products` | List all products (auto-seeds 18 on first request) |
+| POST | `/api/products` | Create product (admin) |
+| PUT | `/api/products/[id]` | Update product (admin) |
+| DELETE | `/api/products/[id]` | Delete product (admin) |
+| POST | `/api/orders` | Place order — validates products server-side, applies promo, persists Order + OrderItems |
+| GET | `/api/orders` | List all orders (admin) |
+| PATCH | `/api/orders/[id]` | Update order status (admin) |
+| GET | `/api/reviews` | List all reviews |
+| POST | `/api/reviews` | Submit a review (find-or-create user by email) |
+| PATCH | `/api/reviews/[id]` | Approve / delete review (admin) |
+| GET | `/api/customers` | List all users (admin) |
+| GET | `/api/admin/stats` | Aggregate stats: counts, revenue, pending orders, recent activity, top products, category breakdown |
+| POST | `/api/login` | Admin login — verifies bcrypt hash, returns JWT cookie |
+| POST | `/api/logout` | Clears admin cookie |
+
+---
+
+## Key Features
+
+### Product Catalog
+- 18 products across 5 categories: Cupcakes, Cakes, Desserts, Gift Boxes, Seasonal
+- Auto-seeded from `src/lib/seed.ts` on first API request — no manual migration needed
+- Quick View modal per product: image, description, ingredients, allergens, shelf life, story, per-category customization options (flavour, frosting, size, colour, message, etc.)
+
+### Cart & Checkout
+- `CartContext` tracks items by `cartKey` (product ID + customizations fingerprint) so different customizations of the same product are separate line items
+- Promo codes validated client-side in `CartContext` and server-side in `/api/orders` — fake codes passed directly to the API are silently rejected
+- Active promo codes: `BINDI10` (10% off), `FIRST10` (10% off first order)
+- Delivery fee: ₹40 under ₹500 subtotal, free at ₹500+
+- Full breakdown (subtotal → promo discount → delivery → total) shown on both cart and checkout pages
+
+### Order Pipeline
+- `POST /api/orders` find-or-creates a User by email, recomputes server-side total, persists Order and OrderItems (with customization notes)
+- Order total can never be manipulated by a client-side price override — server caps line unit price to the DB price range
+
+### Reviews
+- Public form lets customers submit star ratings and comments with product association
+- Reviews stored in DB, shown live on the `/review` page after submit
+- Admin can approve or delete via `/admin/reviews`
+
+### Admin Dashboard (live)
+- All stats fetched from `/api/admin/stats` at page load — no static mock data
+- Recent Orders feed, Recent Reviews feed, Top 5 Products by units sold with progress bars, Catalog Breakdown table
+
+### Contact / WhatsApp
+- All phone numbers centralized in `src/lib/contact.ts` — one change updates every page
+- Current number: +91 99989-86977
+
+---
+
+## Project Structure
+
 ```
-BINDIS/
-├── public/          # Static assets (images, icons, fonts)
-├── src/             # Application source code
-│   ├── app/         # Next.js App Router pages & layouts
-│   ├── components/  # Reusable UI components
-│   └── lib/         # Utility functions, DB config, Firebase setup
-├── components.json  # shadcn/ui configuration
-├── tailwind.config.ts
-├── next.config.ts
-└── package.json
+src/
+├── app/
+│   ├── admin/
+│   │   ├── components/AdminShell.tsx   # Sidebar layout + auth guard
+│   │   ├── dashboard/page.tsx
+│   │   ├── login/page.tsx
+│   │   ├── orders/page.tsx
+│   │   ├── products/page.tsx
+│   │   ├── customers/page.tsx
+│   │   └── reviews/page.tsx
+│   ├── api/
+│   │   ├── admin/stats/route.ts
+│   │   ├── customers/route.ts
+│   │   ├── login/route.ts
+│   │   ├── logout/route.ts
+│   │   ├── orders/route.ts
+│   │   ├── orders/[id]/route.ts
+│   │   ├── products/route.ts
+│   │   ├── products/[id]/route.ts
+│   │   └── reviews/route.ts
+│   ├── cart/
+│   │   ├── components/
+│   │   │   ├── CartContext.tsx
+│   │   │   ├── CartPage.tsx
+│   │   │   └── CheckOut.tsx
+│   │   ├── checkout/page.tsx
+│   │   └── confirmation/page.tsx
+│   ├── contact/page.tsx
+│   ├── gallery/page.tsx
+│   ├── products/
+│   │   ├── components/QuickViewModal.tsx
+│   │   └── page.tsx
+│   ├── review/page.tsx
+│   └── page.tsx                        # Home / landing
+├── components/
+│   └── LayoutShell.tsx                 # Suppresses Header/Footer on /admin/* routes
+├── lib/
+│   ├── auth.ts                         # verifyAdmin() JWT helper
+│   ├── categories.ts                   # categoryFor() — pure, no DB import
+│   ├── contact.ts                      # Centralized phone/WhatsApp constants
+│   ├── prisma.ts                       # Prisma client singleton
+│   ├── productDetails.ts               # Per-product details + customization schema
+│   ├── promo.ts                        # PROMOS array + lookupPromo() (client + server)
+│   └── seed.ts                         # ensureSeeded() — 18 products on first request
+prisma/
+└── schema.prisma
 ```
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Prerequisites
+- Node.js 18+
+- npm 9+
 
-- **Node.js** v18 or higher
-- **npm** v9 or higher
-- A **Firebase** project (for auth/storage)
-- A **MongoDB** connection URI
+### Setup
 
-### Installation
 ```bash
-# 1. Clone the repository
-git clone https://github.com/Anand-Tiwari2404/BINDIS.git
-cd BINDIS
-
-# 2. Install dependencies
+# 1. Clone and install
+git clone <repo-url>
+cd "Bindis Cupcakery"
 npm install
 
-# 3. Set up environment variables
-cp .env.example .env.local
-# Fill in your Firebase and MongoDB credentials in .env.local
+# 2. Push the schema to SQLite (creates bindis.db automatically)
+npx prisma db push
 
-# 4. Start the development server
+# 3. Create the admin account
+npx prisma studio
+# or run a seed script / use the /api/register endpoint once
+
+# 4. Start the dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the app.
+Open [http://localhost:3000](http://localhost:3000).
 
----
+### Environment Variables
 
-## 🔐 Environment Variables
+Create a `.env` file in the project root:
 
-Create a `.env.local` file in the root directory with the following:
 ```env
-# MongoDB
-MONGODB_URI=your_mongodb_connection_string
-
-# Firebase
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+DATABASE_URL="file:./bindis.db"
+JWT_SECRET="your-secret-key-here"
 ```
+
+### Admin Credentials (default)
+
+| Field | Value |
+|---|---|
+| Username | admin |
+| Password | admin123 |
+
+Login at [http://localhost:3000/admin/login](http://localhost:3000/admin/login).
 
 ---
 
-## 📜 Available Scripts
+## Available Scripts
+
 ```bash
-npm run dev      # Start development server with Turbopack
-npm run build    # Create production build
-npm run start    # Start production server
-npm run lint     # Run ESLint checks
+npm run dev      # Dev server (Turbopack)
+npm run build    # Production build
+npm run start    # Production server
+npm run lint     # ESLint
+npx prisma studio   # DB GUI
+npx prisma db push  # Apply schema changes
 ```
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to fork this repository, create a feature branch, and open a pull request.
-
-1. Fork the project
-2. Create your feature branch — `git checkout -b feature/amazing-feature`
-3. Commit your changes — `git commit -m 'Add some amazing feature'`
-4. Push to the branch — `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-> *Made with ❤️ and a sweet tooth 🍬*
+*Made with love for Bindi's Cupcakery, Surat*
