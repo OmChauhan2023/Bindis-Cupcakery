@@ -54,19 +54,22 @@ Admin pages are wrapped by `AdminShell` which guards against unauthenticated acc
 | Method | Route | Description |
 |---|---|---|
 | GET | `/api/products` | List all products (auto-seeds 18 on first request) |
-| POST | `/api/products` | Create product (admin) |
-| PUT | `/api/products/[id]` | Update product (admin) |
-| DELETE | `/api/products/[id]` | Delete product (admin) |
+| POST | `/api/products` | Create product |
+| PUT | `/api/products/[id]` | Update product |
+| DELETE | `/api/products/[id]` | Delete product |
 | POST | `/api/orders` | Place order — validates products server-side, applies promo, persists Order + OrderItems |
-| GET | `/api/orders` | List all orders (admin) |
-| PATCH | `/api/orders/[id]` | Update order status (admin) |
 | GET | `/api/reviews` | List all reviews |
 | POST | `/api/reviews` | Submit a review (find-or-create user by email) |
-| PATCH | `/api/reviews/[id]` | Approve / delete review (admin) |
-| GET | `/api/customers` | List all users (admin) |
+| GET | `/api/users` | List users |
+| POST | `/api/register` | Create initial admin account |
+| POST | `/api/admin/login` | Admin login — verifies bcrypt hash, returns JWT cookie |
+| POST | `/api/admin/logout` | Clears admin cookie |
 | GET | `/api/admin/stats` | Aggregate stats: counts, revenue, pending orders, recent activity, top products, category breakdown |
-| POST | `/api/login` | Admin login — verifies bcrypt hash, returns JWT cookie |
-| POST | `/api/logout` | Clears admin cookie |
+| GET | `/api/admin/orders` | List all orders |
+| PATCH | `/api/admin/orders/[id]` | Update order status |
+| GET | `/api/admin/reviews` | List reviews for moderation |
+| PATCH | `/api/admin/reviews/[id]` | Approve / delete review |
+| GET | `/api/admin/customers` | List all customers |
 
 ---
 
