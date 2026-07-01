@@ -73,7 +73,7 @@ export default function AdminPage() {
       const [statsRes, prodRes, ordersRes, reviewsRes] = await Promise.all([
         api.get("/admin/stats").catch(() => ({ data: { products: 0, orders: 0, customers: 0, revenue: 0 } })),
         api.get("/products").catch(() => ({ data: { products: [] } })),
-        api.get("/admin/orders").catch(() => ({ data: { orders: [] } })),
+        api.get("/orders").catch(() => ({ data: { orders: [] } })),
         api.get("/reviews").catch(() => ({ data: { reviews: [] } })),
       ]);
       setStats(statsRes.data);
@@ -135,7 +135,7 @@ export default function AdminPage() {
 
   const handleUpdateOrderStatus = async (id: number, status: string) => {
     try {
-      await api.put(`/admin/orders/${id}`, { status });
+      await api.put(`/orders/${id}`, { status });
       loadData();
     } catch (err: any) {
       alert("Error updating status");

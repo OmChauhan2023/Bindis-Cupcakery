@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       try {
         const { data } = await api.get('/auth/me');
-        setUser(data);
+        // Backend returns { user: {...} } from getMe
+        setUser(data.user || data);
       } catch (err) {
         localStorage.removeItem('token');
         setUser(null);
@@ -49,7 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data.token) {
       localStorage.setItem('token', data.token);
     }
-    setUser(data);
+    // Backend returns { token, user: {...} }
+    setUser(data.user || data);
   };
 
   const register = async (name: string, email: string, phone?: string, password?: string) => {
@@ -57,7 +59,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data.token) {
       localStorage.setItem('token', data.token);
     }
-    setUser(data);
+    // Backend returns { token, user: {...} }
+    setUser(data.user || data);
   };
 
   const logout = async () => {
