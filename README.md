@@ -120,15 +120,21 @@ src/
 │   │   ├── customers/page.tsx
 │   │   └── reviews/page.tsx
 │   ├── api/
-│   │   ├── admin/stats/route.ts
-│   │   ├── customers/route.ts
-│   │   ├── login/route.ts
-│   │   ├── logout/route.ts
+│   │   ├── admin/
+│   │   │   ├── customers/route.ts
+│   │   │   ├── login/route.ts
+│   │   │   ├── logout/route.ts
+│   │   │   ├── orders/route.ts
+│   │   │   ├── orders/[id]/route.ts
+│   │   │   ├── reviews/route.ts
+│   │   │   ├── reviews/[id]/route.ts
+│   │   │   └── stats/route.ts
 │   │   ├── orders/route.ts
-│   │   ├── orders/[id]/route.ts
 │   │   ├── products/route.ts
 │   │   ├── products/[id]/route.ts
-│   │   └── reviews/route.ts
+│   │   ├── register/route.ts
+│   │   ├── reviews/route.ts
+│   │   └── users/route.ts
 │   ├── cart/
 │   │   ├── components/
 │   │   │   ├── CartContext.tsx

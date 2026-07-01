@@ -1,7 +1,6 @@
-"use client";
-import { useCart } from "@/app/cart/components/CartContext";
+import { useCart } from "@/context/CartContext";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Container,
@@ -19,6 +18,7 @@ import {
   CircularProgress,
   alpha,
   SelectChangeEvent,
+  Chip,
 } from "@mui/material";
 import {
   Person as PersonIcon,
@@ -27,11 +27,11 @@ import {
   ShoppingBag as BagIcon,
   LocalOffer as OfferIcon,
 } from "@mui/icons-material";
-import Chip from "@mui/material/Chip";
+import api from "@/services/api";
 
 const CheckoutPage = () => {
   const { cart, clearCart, promo } = useCart();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const [userDetails, setUserDetails] = useState({
     name: "",
@@ -76,37 +76,29 @@ const CheckoutPage = () => {
     setSubmitting(true);
     setServerError("");
     try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer: {
-            name: userDetails.name.trim(),
-            email: userDetails.email.trim(),
-            phone: userDetails.phone.trim(),
-          },
-          deliveryAddress: userDetails.address.trim(),
-          paymentMethod: userDetails.paymentMethod,
-          promoCode: promo?.code,
-          items: cart.map((c) => ({
-            id: c.id,
-            qty: c.qty,
-            price: c.price,
-            customizations: c.customizations,
-            note: c.note,
-          })),
-        }),
+      const res = await api.post("/orders", {
+        customer: {
+          name: userDetails.name.trim(),
+          email: userDetails.email.trim(),
+          phone: userDetails.phone.trim(),
+        },
+        deliveryAddress: userDetails.address.trim(),
+        paymentMethod: userDetails.paymentMethod,
+        promoCode: promo?.code,
+        items: cart.map((c) => ({
+          id: c.id,
+          qty: c.qty,
+          price: c.price,
+          customizations: c.customizations,
+          note: c.note,
+        })),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setServerError(data.message || "Could not place order");
-        setSubmitting(false);
-        return;
-      }
-      router.push(`/cart/confirmation?orderId=${data.orderId}`);
+      const data = res.data;
+      navigate(`/cart/confirmation?orderId=${data.orderId}`);
       setTimeout(() => clearCart(), 800);
-    } catch (err) {
-      setServerError((err as Error).message || "Network error");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Network error";
+      setServerError(msg);
       setSubmitting(false);
     }
   };
@@ -117,7 +109,7 @@ const CheckoutPage = () => {
         <Typography variant="h1" sx={{ fontSize: "4rem", mb: 2 }}>🛒</Typography>
         <Typography variant="h5" fontWeight={700} mb={1}>Your cart is empty</Typography>
         <Button
-          href="/products"
+          onClick={() => navigate("/products")}
           variant="contained"
           sx={{ mt: 2, borderRadius: "50px", px: 4, background: "linear-gradient(135deg, #ec4899, #8b5cf6)" }}
         >
