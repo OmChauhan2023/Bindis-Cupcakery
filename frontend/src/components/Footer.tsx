@@ -7,129 +7,224 @@ import {
   Link as MuiLink,
   useTheme,
   alpha,
-  Paper
+  Divider,
 } from "@mui/material";
 import {
   Facebook,
   Instagram,
   Mail,
   LocationOn as MapPin,
-  Phone
+  Phone,
+  WhatsApp,
+  Favorite as HeartIcon,
 } from "@mui/icons-material";
-import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/lib/contact";
+import { Link } from "react-router-dom";
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL, CONTACT_WHATSAPP_URL } from "@/lib/contact";
 
 export function Footer() {
   const theme = useTheme();
+  const waQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(CONTACT_WHATSAPP_URL)}&color=128c7e&bgcolor=ffffff&margin=10`;
 
   return (
     <Box
       component="footer"
       sx={{
-        py: 8,
-        background: `linear-gradient(to right, ${alpha(theme.palette.primary.light, 0.3)}, ${alpha(theme.palette.primary.light, 0.1)})`,
-        borderTop: `1px solid ${theme.palette.divider}`,
+        pt: 8,
+        pb: 4,
+        background: `linear-gradient(135deg, #fce7f3 0%, #f5f3ff 100%)`,
+        borderTop: `2px solid ${alpha("#ec4899", 0.15)}`,
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={4} alignItems="center">
-          {/* Contact Info */}
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" color="primary.dark" gutterBottom sx={{ fontWeight: 600 }}>
-              Contact Us
+        <Grid container spacing={5}>
+          {/* Brand Column */}
+          <Grid item xs={12} md={3}>
+            <Typography
+              variant="h5"
+              fontWeight={900}
+              sx={{
+                background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                mb: 1,
+              }}
+            >
+              Bindi's Cupcakery
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <Phone color="primary" />
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                  <MuiLink
-                    href={CONTACT_PHONE_TEL}
-                    color="text.secondary"
-                    sx={{ textDecoration: "none", "&:hover": { color: "primary.main" } }}
-                  >
-                    {CONTACT_PHONE_DISPLAY}
-                  </MuiLink>
-                </Box>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Mail color="primary" />
-                <MuiLink
-                  href="mailto:info@bindiscupcakery.com"
-                  color="text.secondary"
-                  sx={{ textDecoration: "none", "&:hover": { color: "primary.main" } }}
-                >
-                  info@bindiscupcakery.com
-                </MuiLink>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <MapPin color="primary" />
-                <Typography variant="body2" color="text.secondary">
-                  Parle Point, Surat, Gujarat 395007
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          {/* Social Media */}
-          <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
-            <Typography variant="h6" color="primary.dark" gutterBottom sx={{ fontWeight: 600 }}>
-              Follow Us
+            <Typography
+              variant="body2"
+              sx={{ color: "#be185d", fontStyle: "italic", fontWeight: 600, mb: 2 }}
+            >
+              Experience Bliss in Every Bite!
             </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2.5 }}>
+              We're known for our delicious eggless, vegetarian treats — from custom cakes and
+              cupcakes to brownies and more. The perfect treat for every occasion.
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
               <IconButton
                 component="a"
                 href="https://instagram.com/bindis_cupcakery"
                 target="_blank"
                 rel="noopener noreferrer"
+                size="small"
                 sx={{
-                  color: "primary.main",
-                  "&:hover": { color: "primary.dark", transform: "scale(1.1)" },
-                  transition: "all 0.3s"
+                  color: "#be185d",
+                  bgcolor: alpha("#ec4899", 0.1),
+                  "&:hover": { bgcolor: alpha("#ec4899", 0.2), transform: "scale(1.1)" },
+                  transition: "all 0.3s",
                 }}
               >
-                <Instagram fontSize="large" />
+                <Instagram fontSize="small" />
               </IconButton>
               <IconButton
                 component="a"
                 href="https://facebook.com/bindis_cupcakery"
                 target="_blank"
                 rel="noopener noreferrer"
+                size="small"
                 sx={{
-                  color: "primary.main",
-                  "&:hover": { color: "primary.dark", transform: "scale(1.1)" },
-                  transition: "all 0.3s"
+                  color: "#be185d",
+                  bgcolor: alpha("#ec4899", 0.1),
+                  "&:hover": { bgcolor: alpha("#ec4899", 0.2), transform: "scale(1.1)" },
+                  transition: "all 0.3s",
                 }}
               >
-                <Facebook fontSize="large" />
+                <Facebook fontSize="small" />
+              </IconButton>
+              <IconButton
+                component="a"
+                href={CONTACT_WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="small"
+                sx={{
+                  color: "#25d366",
+                  bgcolor: alpha("#25d366", 0.1),
+                  "&:hover": { bgcolor: alpha("#25d366", 0.2), transform: "scale(1.1)" },
+                  transition: "all 0.3s",
+                }}
+              >
+                <WhatsApp fontSize="small" />
               </IconButton>
             </Box>
           </Grid>
 
-          {/* Google Map Embed */}
+          {/* Quick Links */}
+          <Grid item xs={6} md={2}>
+            <Typography variant="subtitle2" fontWeight={800} color="primary.dark" mb={2} sx={{ letterSpacing: 1 }}>
+              OUR MENU
+            </Typography>
+            {["Truffles", "Brownies", "Cookies", "Cupcakes", "Donuts"].map((item) => (
+              <Box key={item} mb={1}>
+                <MuiLink
+                  component={Link}
+                  to="/products"
+                  underline="none"
+                  sx={{ color: "text.secondary", fontSize: "0.875rem", "&:hover": { color: "primary.main" }, transition: "color 0.2s" }}
+                >
+                  {item}
+                </MuiLink>
+              </Box>
+            ))}
+          </Grid>
+
+          {/* Contact Info */}
+          <Grid item xs={6} md={3}>
+            <Typography variant="subtitle2" fontWeight={800} color="primary.dark" mb={2} sx={{ letterSpacing: 1 }}>
+              CONTACT US
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8 }}>
+              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+                <MapPin sx={{ color: "#be185d", fontSize: 20, mt: 0.2, flexShrink: 0 }} />
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Parle Point, Surat,<br />Gujarat 395007
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Phone sx={{ color: "#be185d", fontSize: 20, flexShrink: 0 }} />
+                <MuiLink
+                  href={CONTACT_PHONE_TEL}
+                  color="text.secondary"
+                  sx={{ fontSize: "0.875rem", textDecoration: "none", "&:hover": { color: "primary.main" } }}
+                >
+                  {CONTACT_PHONE_DISPLAY}
+                </MuiLink>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Mail sx={{ color: "#be185d", fontSize: 20, flexShrink: 0 }} />
+                <MuiLink
+                  href="mailto:info@bindiscupcakery.com"
+                  color="text.secondary"
+                  sx={{ fontSize: "0.875rem", textDecoration: "none", "&:hover": { color: "primary.main" } }}
+                >
+                  info@bindiscupcakery.com
+                </MuiLink>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* WhatsApp QR */}
           <Grid item xs={12} md={4}>
-            <Paper
-              elevation={2}
-              sx={{
-                borderRadius: 2,
-                overflow: "hidden",
-                height: 150,
-              }}
-            >
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d567.2925023793136!2d72.7914954!3d21.174258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04ddd6dae8af5%3A0xe17d92a28035ffe2!2sParle%20Point!5e0!3m2!1sen!2sin!4v1707900000000!5m2!1sen!2sin"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-              ></iframe>
-            </Paper>
+            <Typography variant="subtitle2" fontWeight={800} color="primary.dark" mb={2} sx={{ letterSpacing: 1 }}>
+              STAY CONNECTED
+            </Typography>
+            <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
+              <Box
+                sx={{
+                  p: 1.2,
+                  bgcolor: "white",
+                  borderRadius: 3,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                  border: "1px solid",
+                  borderColor: alpha("#25d366", 0.3),
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <img
+                  src={waQrUrl}
+                  alt="Scan to connect on WhatsApp"
+                  width={120}
+                  height={120}
+                  style={{ borderRadius: 8, display: "block" }}
+                />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <WhatsApp sx={{ color: "#25d366", fontSize: 14 }} />
+                  <Typography variant="caption" sx={{ color: "#128c7e", fontWeight: 700, fontSize: "0.65rem" }}>
+                    Scan to WhatsApp
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ pt: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 1.5 }}>
+                  Chat with us directly on WhatsApp for custom orders, bulk enquiries, and delivery details.
+                </Typography>
+                <MuiLink
+                  href={CONTACT_WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  underline="always"
+                  sx={{ color: "#25d366", fontWeight: 700, fontSize: "0.875rem" }}
+                >
+                  Open WhatsApp →
+                </MuiLink>
+              </Box>
+            </Box>
           </Grid>
         </Grid>
 
+        <Divider sx={{ my: 4, borderColor: alpha("#ec4899", 0.15) }} />
+
         {/* Footer Bottom */}
-        <Box sx={{ mt: 6, pt: 3, borderTop: `1px solid ${theme.palette.divider}`, textAlign: "center" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            © {new Date().getFullYear()} Bindi&apos;s Cupcakery. All rights reserved.
+            © {new Date().getFullYear()} Bindi's Cupcakery. All rights reserved.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            Made with <HeartIcon sx={{ color: "#ec4899", fontSize: 14 }} /> in Surat, India
           </Typography>
         </Box>
       </Container>

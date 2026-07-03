@@ -18,6 +18,7 @@ import Contact from "./pages/Contact";
 import Gallery from "./pages/Gallery";
 import Reviews from "./pages/Reviews";
 import Admin from "./pages/Admin";
+import About from "./pages/About";
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
             <LayoutShell>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />

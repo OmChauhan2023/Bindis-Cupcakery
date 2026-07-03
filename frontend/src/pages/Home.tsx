@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import {
   Box,
@@ -568,6 +569,143 @@ export default function Home() {
           ))}
         </Grid>
       </Container>
+
+      {/* ── Our Story Section ── */}
+      <Box sx={{ bgcolor: "white", py: { xs: 8, md: 11 } }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.65 }}
+              >
+                <Box sx={{ position: "relative" }}>
+                  <Box
+                    sx={{
+                      borderRadius: 5,
+                      overflow: "hidden",
+                      boxShadow: "0 24px 64px rgba(190,24,93,0.15)",
+                    }}
+                  >
+                    <img
+                      src="/bakery_interior.jpg"
+                      alt="Bindi's Cupcakery kitchen"
+                      style={{ width: "100%", height: 380, objectFit: "cover", display: "block" }}
+                    />
+                  </Box>
+                  {/* Floating stat cards */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: -18,
+                      right: -18,
+                      px: 2.5,
+                      py: 1.5,
+                      borderRadius: 4,
+                      background: "linear-gradient(135deg, #be185d, #7c3aed)",
+                      color: "white",
+                      textAlign: "center",
+                      boxShadow: "0 12px 32px rgba(190,24,93,0.35)",
+                    }}
+                  >
+                    <Typography variant="h4" fontWeight={900}>500+</Typography>
+                    <Typography variant="caption" fontWeight={700}>Happy Customers</Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -18,
+                      left: -18,
+                      px: 2.5,
+                      py: 1.5,
+                      borderRadius: 4,
+                      bgcolor: "white",
+                      textAlign: "center",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <Typography variant="h4" fontWeight={900} sx={{ color: "#be185d" }}>2020</Typography>
+                    <Typography variant="caption" fontWeight={700} color="text.secondary">Est. in Surat</Typography>
+                  </Box>
+                </Box>
+              </motion.div>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.65 }}
+              >
+                <Typography variant="overline" sx={{ color: "#be185d", fontWeight: 700, letterSpacing: 3 }}>
+                  Our Story
+                </Typography>
+                <Typography
+                  variant="h3"
+                  fontWeight={900}
+                  sx={{ mt: 1, mb: 2.5, lineHeight: 1.2 }}
+                >
+                  Baked with Passion<br />
+                  <Box component="span" sx={{ color: "#be185d" }}>Since 2020</Box>
+                </Typography>
+                <Typography
+                  color="text.secondary"
+                  sx={{ mb: 2, lineHeight: 1.9, fontSize: "1.05rem" }}
+                >
+                  Welcome to Bindi's Cupcakery — a cozy cloud kitchen born from a love of baking
+                  and a dream to spread sweetness. Established in 2020, right in the heart of our
+                  home in Surat, we've been creating handcrafted cupcakes and desserts that bring
+                  joy to every bite.
+                </Typography>
+                <Typography
+                  color="text.secondary"
+                  sx={{ mb: 4, lineHeight: 1.9, fontSize: "1.05rem" }}
+                >
+                  Every truffle, brownie, and custom cake we make carries our promise —
+                  <strong style={{ color: "#be185d" }}> made fresh, made with love, made for you.</strong>
+                </Typography>
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                  <Button
+                    component={Link}
+                    to="/about"
+                    variant="contained"
+                    sx={{
+                      borderRadius: "50px",
+                      px: 4,
+                      py: 1.4,
+                      fontWeight: 700,
+                      background: "linear-gradient(135deg, #d97a9c, #9b7bd0)",
+                      boxShadow: "0 8px 24px rgba(217,122,156,0.28)",
+                      "&:hover": { transform: "translateY(-2px)" },
+                      transition: "all 0.25s",
+                    }}
+                  >
+                    Our Full Story →
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/products"
+                    variant="outlined"
+                    sx={{
+                      borderRadius: "50px",
+                      px: 4,
+                      py: 1.4,
+                      fontWeight: 700,
+                      borderColor: alpha("#be185d", 0.4),
+                      color: "#be185d",
+                      "&:hover": { bgcolor: alpha("#be185d", 0.05) },
+                    }}
+                  >
+                    Shop Now
+                  </Button>
+                </Box>
+              </motion.div>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* ── Final CTA Banner ── */}
       <Box

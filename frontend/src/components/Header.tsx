@@ -26,6 +26,7 @@ import { styled } from "@mui/material/styles";
 import api from "@/services/api";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import CartDrawer from "@/components/CartDrawer";
 
 const SearchOverlay = styled("div")(({ theme }) => ({
   position: "absolute",
@@ -65,6 +66,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const cartCount = cart.reduce((acc, item) => acc + item.qty, 0);
@@ -110,6 +112,7 @@ export default function Header() {
 
   const navLinks = [
     { title: "Home", path: "/" },
+    { title: "About", path: "/about" },
     { title: "Products", path: "/products" },
     { title: "Gallery", path: "/gallery" },
     { title: "Contact", path: "/contact" },
@@ -157,8 +160,7 @@ export default function Header() {
             </IconButton>
 
             <IconButton
-              component={Link}
-              to="/cart"
+              onClick={() => setCartDrawerOpen(true)}
               color="inherit"
               sx={{
                 bgcolor: alpha(theme.palette.text.primary, 0.05),
@@ -222,6 +224,8 @@ export default function Header() {
           </Container>
         </SearchOverlay>
       </Fade>
+
+      <CartDrawer open={cartDrawerOpen} onClose={() => setCartDrawerOpen(false)} />
     </AppBar>
   );
 }
