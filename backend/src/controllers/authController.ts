@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../config/db';
+import User from '../models/User';
+import Admin from '../models/Admin';
 import { AuthRequest } from '../middleware/authMiddleware';
 
-const generateToken = (id: number, role: string) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
+const generateToken = (id: any, role: string) => {
+  return jwt.sign({ id: id.toString(), role }, process.env.JWT_SECRET || 'secret', {
     expiresIn: '30d',
   });
 };
@@ -21,7 +22,7 @@ export const registerUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'All fields (name, email, phone) are required' });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already in use' });
     }
@@ -31,14 +32,12 @@ export const registerUser = async (req: Request, res: Response) => {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
-    const newUser = await prisma.user.create({
-      data: { name, email, phone, password: hashedPassword }
-    });
+    const newUser = await User.create({ name, email, phone, password: hashedPassword });
 
-    const token = generateToken(newUser.id, 'user');
+    const token = generateToken(newUser._id, 'user');
 
     res.cookie('token', token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/',
@@ -48,7 +47,7 @@ export const registerUser = async (req: Request, res: Response) => {
       message: 'User created successfully',
       token,
       user: {
-        id: newUser.id,
+        id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         phone: newUser.phone,
@@ -72,18 +71,16 @@ export const registerAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const existingAdmin = await prisma.admin.findUnique({ where: { username } });
+    const existingAdmin = await Admin.findOne({ username });
     if (existingAdmin) {
       return res.status(400).json({ message: 'Username already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin = await prisma.admin.create({
-      data: { username, password: hashedPassword, role }
-    });
+    const admin = await Admin.create({ username, password: hashedPassword, role });
 
-    return res.status(201).json({ message: 'Admin created successfully', admin: { id: admin.id, username: admin.username } });
+    return res.status(201).json({ message: 'Admin created successfully', admin: { id: admin._id, username: admin.username } });
   } catch (error: any) {
     console.error('Error creating admin:', error);
     return res.status(500).json({ message: 'Internal Server Error' });
@@ -103,14 +100,14 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Check if it's an admin logging in
-    const admin = await prisma.admin.findUnique({ where: { username: identifier } });
+    const admin = await Admin.findOne({ username: identifier });
     if (admin) {
       const isValidPassword = await bcrypt.compare(password, admin.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      const token = generateToken(admin.id, admin.role);
+      const token = generateToken(admin._id, admin.role);
       
       res.cookie('adminToken', token, {
         httpOnly: false,
@@ -129,13 +126,13 @@ export const login = async (req: Request, res: Response) => {
       return res.json({
         message: 'Admin login successful',
         token,
-        user: { id: admin.id, username: admin.username, role: admin.role },
+        user: { id: admin._id, username: admin.username, role: admin.role },
       });
     }
 
     // Otherwise check regular user
     if (email || identifier.includes('@')) {
-      const user = await prisma.user.findUnique({ where: { email: identifier } });
+      const user = await User.findOne({ email: identifier });
       if (!user) {
         return res.status(401).json({ message: 'Invalid email or user not found' });
       }
@@ -147,7 +144,7 @@ export const login = async (req: Request, res: Response) => {
         }
       }
 
-      const token = generateToken(user.id, 'user');
+      const token = generateToken(user._id, 'user');
 
       res.cookie('token', token, {
         httpOnly: false,
@@ -159,7 +156,7 @@ export const login = async (req: Request, res: Response) => {
       return res.json({
         message: 'Login successful',
         token,
-        user: { id: user.id, name: user.name, email: user.email, role: 'user' },
+        user: { id: user._id, name: user.name, email: user.email, role: 'user' },
       });
     }
 

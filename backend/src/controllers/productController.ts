@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import prisma from '../config/db';
+import Product from '../models/Product';
 import { ensureSeeded } from '../utils/seed';
 import { categoryFor } from '../utils/categories';
 
@@ -9,8 +9,12 @@ import { categoryFor } from '../utils/categories';
 export const getProducts = async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
-    const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
-    const enriched = products.map((p) => ({ ...p, category: categoryFor(p.name) }));
+    const products = await Product.find().sort({ _id: 1 }).lean();
+    const enriched = products.map((p) => ({
+      ...p,
+      id: p._id,
+      category: p.category || categoryFor(p.name),
+    }));
     return res.status(200).json({ products: enriched });
   } catch (error: any) {
     console.error('Error fetching products:', error);
@@ -23,17 +27,13 @@ export const getProducts = async (req: Request, res: Response) => {
 // @access  Public
 export const getProductById = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id));
-    if (isNaN(id)) {
-      return res.status(400).json({ message: 'Invalid product ID' });
-    }
-
-    const product = await prisma.product.findUnique({ where: { id } });
+    const id = req.params.id;
+    const product = await Product.findById(id).lean();
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const enriched = { ...product, category: categoryFor(product.name) };
+    const enriched = { ...product, id: product._id, category: product.category || categoryFor(product.name) };
     return res.status(200).json({ product: enriched });
   } catch (error: any) {
     console.error('Error fetching product:', error);
@@ -52,25 +52,30 @@ export const createProduct = async (req: Request, res: Response) => {
       if (data.length === 0) {
         return res.status(400).json({ message: 'No products to add' });
       }
-      const saved = await prisma.product.createMany({
-        data: data.map((item: any) => ({
+      const saved = await Product.insertMany(
+        data.map((item: any) => ({
           name: item.name,
           description: item.description,
           price: parseFloat(String(item.price)),
           image: item.image,
-        })),
-      });
-      return res.status(201).json({ message: 'Products added', count: saved.count });
+          category: item.category || categoryFor(item.name),
+        }))
+      );
+      return res.status(201).json({ message: 'Products added', count: saved.length });
     }
 
-    const { name, description, price, image } = data;
+    const { name, description, price, image, category } = data;
     if (!name || !description || !price || !image) {
       return res.status(400).json({ message: 'All fields are required' });
     }
-    const newProduct = await prisma.product.create({
-      data: { name, description, price: parseFloat(price), image },
+    const newProduct = await Product.create({
+      name,
+      description,
+      price: parseFloat(price),
+      image,
+      category: category || categoryFor(name),
     });
-    return res.status(201).json({ message: 'Product added', product: newProduct });
+    return res.status(201).json({ message: 'Product added', product: { ...newProduct.toObject(), id: newProduct._id } });
   } catch (error: any) {
     console.error('Error adding product:', error);
     return res.status(500).json({ message: 'Error adding product', error: error.message });
@@ -82,20 +87,26 @@ export const createProduct = async (req: Request, res: Response) => {
 // @access  Private/Admin
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id));
-    const { name, description, price, image } = req.body;
+    const id = req.params.id;
+    const { name, description, price, image, category } = req.body;
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
+    const product = await Product.findByIdAndUpdate(
+      id,
+      {
         ...(name && { name }),
         ...(description && { description }),
         ...(price && { price: parseFloat(String(price)) }),
         ...(image && { image }),
+        ...(category && { category }),
       },
-    });
+      { new: true }
+    ).lean();
 
-    return res.status(200).json({ message: 'Product updated', product });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    return res.status(200).json({ message: 'Product updated', product: { ...product, id: product._id } });
   } catch (error: any) {
     console.error('Error updating product:', error);
     return res.status(500).json({ message: 'Error updating product', error: error.message });
@@ -107,8 +118,11 @@ export const updateProduct = async (req: Request, res: Response) => {
 // @access  Private/Admin
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id));
-    await prisma.product.delete({ where: { id } });
+    const id = req.params.id;
+    const deleted = await Product.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     return res.status(200).json({ message: 'Product deleted' });
   } catch (error: any) {
     console.error('Error deleting product:', error);

@@ -1,16 +1,16 @@
-import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import path from 'path';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-function createPrismaClient() {
-  const dbPath = path.resolve(process.cwd(), '../dev.db');
-  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
-  return new PrismaClient({
-    adapter,
-    log: process.env.NODE_ENV === 'development' ? ['error'] : [],
-  });
-}
+dotenv.config();
 
-const prisma = createPrismaClient();
+const connectDB = async (): Promise<void> => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bindi-cupcakery');
+    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
+  } catch (error: any) {
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    process.exit(1);
+  }
+};
 
-export default prisma;
+export default connectDB;

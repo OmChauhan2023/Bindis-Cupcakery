@@ -1,4 +1,5 @@
-import prisma from "../config/db";
+import Product from "../models/Product";
+import { categoryFor } from "./categories";
 
 const SEED_PRODUCTS = [
   { name: "Blueberry Truffle", description: "Luscious blueberry filling encased in a smooth white chocolate shell.", price: 150, image: "/Blueberry_Truffle.jpg" },
@@ -21,19 +22,38 @@ const SEED_PRODUCTS = [
   { name: "Signature Cupcake", description: "Our famous handcrafted cupcake with velvet smooth frosting.", price: 95, image: "/cupcake.jpg" },
 ];
 
+import mongoose from "mongoose";
+import connectDB from "../config/db";
+
 export async function ensureSeeded() {
   try {
-    const count = await prisma.product.count();
-    if (count > 0) return;
-    await prisma.product.createMany({
-      data: SEED_PRODUCTS.map((p) => ({
+    const count = await Product.countDocuments();
+    if (count > 0) {
+      console.log("ℹ️ MongoDB already has menu products seeded.");
+      return;
+    }
+    console.log("🌱 Seeding MongoDB Atlas with Bindi's Cupcakery menu...");
+    await Product.insertMany(
+      SEED_PRODUCTS.map((p) => ({
         name: p.name,
         description: p.description,
         price: p.price,
         image: p.image,
-      })),
-    });
+        category: categoryFor(p.name),
+      }))
+    );
+    console.log("✅ Menu seeded successfully into MongoDB Atlas!");
   } catch (error) {
     console.error("Seed error:", error);
   }
 }
+
+if (require.main === module) {
+  connectDB().then(async () => {
+    await ensureSeeded();
+    await mongoose.disconnect();
+    console.log("👋 Disconnected from MongoDB Atlas");
+    process.exit(0);
+  });
+}
+

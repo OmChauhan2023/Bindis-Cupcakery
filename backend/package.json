@@ -7,19 +7,20 @@
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "prisma:generate": "prisma generate"
+    "seed": "ts-node src/utils/seed.ts",
+    "migrate:images": "ts-node src/utils/migrateImagesToCloudinary.ts"
   },
   "dependencies": {
-    "@prisma/client": "^7.8.0",
-    "@prisma/adapter-better-sqlite3": "^7.8.0",
     "bcryptjs": "^3.0.2",
-    "better-sqlite3": "^12.9.0",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0"
+    "mongoose": "^9.7.3",
+    "morgan": "^1.10.0",
+    "multer": "^2.2.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -29,9 +30,9 @@
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.13.4",
     "nodemon": "^3.1.9",
-    "prisma": "^7.8.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }

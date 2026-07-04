@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import prisma from '../config/db';
+import Order from '../models/Order';
+import User from '../models/User';
+import Product from '../models/Product';
 import { lookupPromo } from '../utils/promo';
 import { AuthRequest } from '../middleware/authMiddleware';
 
@@ -21,27 +23,28 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 
     // Find-or-create user by email
-    let user = await prisma.user.findUnique({ where: { email: customer.email } });
+    let user = await User.findOne({ email: customer.email });
     if (!user) {
-      user = await prisma.user.create({
-        data: { name: customer.name, email: customer.email, phone: customer.phone },
+      user = await User.create({
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
       });
     } else {
       if (user.name !== customer.name || user.phone !== customer.phone) {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { name: customer.name, phone: customer.phone },
-        });
+        user.name = customer.name;
+        user.phone = customer.phone;
+        await user.save();
       }
     }
 
-    const productIds = items.map((it: any) => Number(it.id)).filter((n: any) => Number.isFinite(n));
-    const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
-    const productMap = new Map(products.map((p) => [p.id, p]));
+    const productIds = items.map((it: any) => String(it.id));
+    const products = await Product.find({ _id: { $in: productIds } });
+    const productMap = new Map(products.map((p) => [p._id.toString(), p]));
 
     let subtotal = 0;
     const orderItemsData = items.map((it: any) => {
-      const pid = Number(it.id);
+      const pid = String(it.id);
       const p = productMap.get(pid);
       if (!p) throw new Error(`Product ${it.id} not found`);
       const qty = Math.max(1, Math.floor(it.qty || 1));
@@ -53,10 +56,11 @@ export const createOrder = async (req: Request, res: Response) => {
       }
       if (it.note) notesParts.push(`Note: ${it.note}`);
       return {
-        productId: pid,
+        productId: p._id,
+        name: p.name,
         quantity: qty,
         price: lineUnit,
-        notes: notesParts.length > 0 ? notesParts.join(' || ') : null,
+        notes: notesParts.length > 0 ? notesParts.join(' || ') : undefined,
       };
     });
 
@@ -69,20 +73,17 @@ export const createOrder = async (req: Request, res: Response) => {
       ? `Promo: ${validPromo.code} (−₹${discount}) | Delivery: ₹${deliveryFee} | Subtotal: ₹${subtotal}`
       : `Delivery: ₹${deliveryFee} | Subtotal: ₹${subtotal}`;
 
-    const order = await prisma.order.create({
-      data: {
-        userId: user.id,
-        total,
-        paymentMethod: paymentMethod || 'Cash',
-        deliveryAddress: `${deliveryAddress}\n— ${orderNote}`,
-        items: { create: orderItemsData },
-      },
-      include: { items: true },
+    const order = await Order.create({
+      user: user._id,
+      total,
+      paymentMethod: paymentMethod || 'Cash',
+      deliveryAddress: `${deliveryAddress}\n— ${orderNote}`,
+      items: orderItemsData,
     });
 
     return res.status(201).json({
       message: 'Order placed',
-      orderId: order.id,
+      orderId: order._id,
       total: order.total,
       subtotal,
       discount,
@@ -101,12 +102,22 @@ export const createOrder = async (req: Request, res: Response) => {
 export const getMyOrders = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ message: 'Not authorized' });
-    const orders = await prisma.order.findMany({
-      where: { userId: req.user.id },
-      orderBy: { createdAt: 'desc' },
-      include: { items: { include: { product: true } } },
-    });
-    return res.json({ orders });
+    const orders = await Order.find({ user: req.user.id || req.user._id })
+      .sort({ createdAt: -1 })
+      .populate('items.productId')
+      .lean();
+
+    const formatted = orders.map((o) => ({
+      ...o,
+      id: o._id,
+      items: o.items.map((it: any) => ({
+        ...it,
+        id: it._id,
+        product: it.productId || { name: it.name, price: it.price },
+      })),
+    }));
+
+    return res.json({ orders: formatted });
   } catch (error: any) {
     console.error('Get user orders error:', error);
     return res.status(500).json({ message: 'Server error', error: error.message });
@@ -118,14 +129,23 @@ export const getMyOrders = async (req: AuthRequest, res: Response) => {
 // @access  Private/Admin
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await prisma.order.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: true,
-        items: { include: { product: true } },
-      },
-    });
-    return res.json({ orders });
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate('user')
+      .populate('items.productId')
+      .lean();
+
+    const formatted = orders.map((o) => ({
+      ...o,
+      id: o._id,
+      items: o.items.map((it: any) => ({
+        ...it,
+        id: it._id,
+        product: it.productId || { name: it.name, price: it.price },
+      })),
+    }));
+
+    return res.json({ orders: formatted });
   } catch (error: any) {
     return res.status(500).json({ message: 'Error', error: error.message });
   }
@@ -136,13 +156,13 @@ export const getAllOrders = async (req: Request, res: Response) => {
 // @access  Private/Admin
 export const updateOrder = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id));
+    const id = req.params.id;
     const { status } = req.body;
-    const updated = await prisma.order.update({
-      where: { id },
-      data: { status },
-    });
-    return res.json({ order: updated });
+    const updated = await Order.findByIdAndUpdate(id, { status }, { new: true }).lean();
+    if (!updated) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    return res.json({ order: { ...updated, id: updated._id } });
   } catch (error: any) {
     return res.status(500).json({ message: 'Error', error: error.message });
   }
@@ -153,8 +173,8 @@ export const updateOrder = async (req: Request, res: Response) => {
 // @access  Private/Admin
 export const deleteOrder = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id));
-    await prisma.order.delete({ where: { id } });
+    const id = req.params.id;
+    await Order.findByIdAndDelete(id);
     return res.json({ message: 'Order deleted' });
   } catch (error: any) {
     return res.status(500).json({ message: 'Error', error: error.message });

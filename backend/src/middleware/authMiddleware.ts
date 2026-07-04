@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import prisma from '../config/db';
+import User from '../models/User';
+import Admin from '../models/Admin';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -11,8 +12,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
+  } else if (req.cookies && (req.cookies.token || req.cookies.adminToken)) {
+    token = req.cookies.token || req.cookies.adminToken;
   }
 
   if (!token) {
@@ -24,17 +25,17 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     
     // Check if it's admin or regular user
     if (decoded.role === 'admin') {
-      const admin = await prisma.admin.findUnique({ where: { id: decoded.id } });
+      const admin = await Admin.findById(decoded.id).select('-password').lean();
       if (!admin) {
         return res.status(401).json({ message: 'Not authorized, admin not found' });
       }
-      req.user = { ...admin, role: 'admin' };
+      req.user = { ...admin, id: admin._id, role: 'admin' };
     } else {
-      const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+      const user = await User.findById(decoded.id).select('-password').lean();
       if (!user) {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }
-      req.user = { ...user, role: 'user' };
+      req.user = { ...user, id: user._id, role: 'user' };
     }
 
     next();
