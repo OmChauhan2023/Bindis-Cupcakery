@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import api from "@/services/api";
 import {
   Box,
   Container,
@@ -103,25 +104,29 @@ export default function ProfilePage() {
     }
   };
 
-  // Sample orders for instant visual gratification in the profile dashboard
-  const mockOrders = [
-    {
-      id: "#ORD-9823",
-      date: "July 2, 2026",
-      items: "2x Belgian Dark Chocolate Dream, 1x Red Velvet Supreme",
-      total: "₹650",
-      status: "Delivered",
-      statusColor: "success" as const,
-    },
-    {
-      id: "#ORD-9741",
-      date: "June 28, 2026",
-      items: "6x Assorted Party Box Cupcakes",
-      total: "₹1,200",
-      status: "Delivered",
-      statusColor: "success" as const,
-    },
-  ];
+  // Real order history state fetched dynamically from backend
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+
+  useEffect(() => {
+    if (tab === 1 && user) {
+      const fetchMyOrders = async () => {
+        setLoadingOrders(true);
+        setOrdersError("");
+        try {
+          const res = await api.get("/orders/my-orders");
+          setOrders(res.data.orders || []);
+        } catch (err: any) {
+          console.error("Failed to load orders:", err);
+          setOrdersError("Could not load your orders. Please try again.");
+        } finally {
+          setLoadingOrders(false);
+        }
+      };
+      fetchMyOrders();
+    }
+  }, [tab, user]);
 
   return (
     <Box
@@ -478,53 +483,89 @@ export default function ProfilePage() {
                   Order More Cupcakes
                 </Button>
               </Box>
-              <Grid container spacing={3}>
-                {mockOrders.map((order) => (
-                  <Grid item xs={12} key={order.id}>
-                    <Card
-                      variant="outlined"
-                      sx={{
-                        borderRadius: 3,
-                        p: 1,
-                        transition: "all 0.3s ease",
-                        "&:hover": { borderColor: "primary.main", boxShadow: "0 8px 24px rgba(0,0,0,0.06)" },
-                      }}
-                    >
-                      <CardContent>
-                        <Grid container spacing={2} alignItems="center">
-                          <Grid item xs={12} sm={3}>
-                            <Typography variant="subtitle2" color="primary.main" sx={{ fontWeight: 800 }}>
-                              {order.id}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {order.date}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={5}>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {order.items}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={2}>
-                            <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                              {order.total}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={2} sx={{ textAlign: { xs: "left", sm: "right" } }}>
-                            <Chip
-                              icon={<LocalShippingIcon />}
-                              label={order.status}
-                              color={order.statusColor}
-                              size="small"
-                              sx={{ fontWeight: 700 }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+              {loadingOrders ? (
+                <Box sx={{ textAlign: "center", py: 6 }}>
+                  <CircularProgress color="primary" />
+                  <Typography variant="body1" sx={{ mt: 2, fontWeight: 600, color: "text.secondary" }}>
+                    Loading your cupcake orders... 🧁
+                  </Typography>
+                </Box>
+              ) : ordersError ? (
+                <Alert severity="error" sx={{ borderRadius: 2 }}>{ordersError}</Alert>
+              ) : orders.length === 0 ? (
+                <Paper variant="outlined" sx={{ p: 6, textAlign: "center", borderRadius: 4, bgcolor: "rgba(255,255,255,0.5)" }}>
+                  <ShoppingBagIcon sx={{ fontSize: 60, color: "text.disabled", mb: 2 }} />
+                  <Typography variant="h6" fontWeight={700} gutterBottom>
+                    No Orders Found Yet! 🧁
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    You haven't placed any cupcake orders from this account yet. Treat yourself today!
+                  </Typography>
+                  <Button component={Link} to="/products" variant="contained" color="primary" sx={{ borderRadius: 2.5, fontWeight: 700, px: 4 }}>
+                    Explore Menu
+                  </Button>
+                </Paper>
+              ) : (
+                <Grid container spacing={3}>
+                  {orders.map((order: any) => {
+                    const orderIdStr = order.id ? `#ORD-${order.id.toString().slice(-6).toUpperCase()}` : "#ORD-RECENT";
+                    const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) : "Recent";
+                    const itemsStr = order.items && order.items.length > 0 ? order.items.map((it: any) => `${it.quantity}x ${it.product?.name || it.name || "Cupcake"}`).join(", ") : "Delightful Cupcakes Box";
+                    const totalStr = `₹${order.total || 0}`;
+                    const statusStr = order.status || "Pending";
+                    let statusColor: any = "warning";
+                    if (statusStr.toLowerCase() === "delivered") statusColor = "success";
+                    else if (statusStr.toLowerCase() === "cancelled") statusColor = "error";
+                    else if (statusStr.toLowerCase() === "processing") statusColor = "info";
+
+                    return (
+                      <Grid item xs={12} key={order.id || Math.random()}>
+                        <Card
+                          variant="outlined"
+                          sx={{
+                            borderRadius: 3,
+                            p: 1,
+                            transition: "all 0.3s ease",
+                            "&:hover": { borderColor: "primary.main", boxShadow: "0 8px 24px rgba(0,0,0,0.06)" },
+                          }}
+                        >
+                          <CardContent>
+                            <Grid container spacing={2} alignItems="center">
+                              <Grid item xs={12} sm={3}>
+                                <Typography variant="subtitle2" color="primary.main" sx={{ fontWeight: 800 }}>
+                                  {orderIdStr}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {dateStr}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={5}>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {itemsStr}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6} sm={2}>
+                                <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                                  {totalStr}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6} sm={2} sx={{ textAlign: { xs: "left", sm: "right" } }}>
+                                <Chip
+                                  icon={<LocalShippingIcon />}
+                                  label={statusStr}
+                                  color={statusColor}
+                                  size="small"
+                                  sx={{ fontWeight: 700 }}
+                                />
+                              </Grid>
+                            </Grid>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              )}
             </Box>
           )}
 

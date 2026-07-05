@@ -6,6 +6,14 @@ if (typeof dns.setDefaultResultOrder === 'function') {
   dns.setDefaultResultOrder('ipv4first');
 }
 
+// Custom DNS lookup function that strictly enforces IPv4 (AF_INET) resolution
+const customLookup = (hostname: string, options: any, callback: any) => {
+  const cb = typeof options === 'function' ? options : callback;
+  return dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+    cb(err, address, family);
+  });
+};
+
 // Create nodemailer transporter using port 587 (STARTTLS), IPv4 family, and explicit timeouts to prevent cloud firewall blocks
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -22,6 +30,11 @@ const createTransporter = () => {
     },
     tls: {
       rejectUnauthorized: false,
+      lookup: customLookup,
+    },
+    socketOptions: {
+      family: 4,
+      lookup: customLookup,
     },
     family: 4, // Force IPv4 sockets (bypasses Render IPv6 network absence)
     connectionTimeout: 10000,
