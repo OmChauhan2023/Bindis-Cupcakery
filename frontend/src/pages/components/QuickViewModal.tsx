@@ -19,7 +19,8 @@ import { useCart, CartCustomization } from "@/context/CartContext";
 import { getProductDetails, CustomizationOption } from "@/lib/productDetails";
 
 interface Product {
-  id: number;
+  id: string;
+  _id?: string;
   name: string;
   description: string;
   price: number;
@@ -32,7 +33,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   isFavorite: boolean;
-  onToggleFavorite: (id: number) => void;
+  onToggleFavorite: (id: string) => void;
 }
 
 function defaultValues(opts: CustomizationOption[]): Record<string, string | string[]> {

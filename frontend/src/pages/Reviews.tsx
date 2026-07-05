@@ -19,12 +19,13 @@ import { Star as StarIcon, StarBorder as StarBorderIcon, Send as SendIcon } from
 import api from "@/services/api";
 
 interface Product {
-  id: number;
+  id: string;
+  _id?: string;
   name: string;
 }
 
 interface Review {
-  id: number;
+  id: string;
   rating: number;
   comment: string;
   createdAt: string;
@@ -69,7 +70,7 @@ export default function Reviews() {
   const [products, setProducts] = useState<Product[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [productId, setProductId] = useState<number | "">("");
+  const [productId, setProductId] = useState<string>("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
@@ -199,12 +200,13 @@ export default function Reviews() {
                 select
                 label="What did you order?"
                 value={productId}
-                onChange={(e) => setProductId(Number(e.target.value))}
+                onChange={(e) => setProductId(e.target.value)}
                 sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
               >
-                {products.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
-                ))}
+                {products.map((p) => {
+                  const pid = (p as any)._id || p.id;
+                  return <MenuItem key={pid} value={pid}>{p.name}</MenuItem>;
+                })}
               </TextField>
               <TextField
                 fullWidth

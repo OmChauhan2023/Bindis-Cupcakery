@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import HeroSection from "@/components/HeroSection";
 import {
   Box,
@@ -12,6 +13,7 @@ import {
   Chip,
   alpha,
   Avatar,
+  Skeleton,
 } from "@mui/material";
 import {
   Spa as LeafIcon,
@@ -26,6 +28,15 @@ import {
   WhatsApp as WhatsAppIcon,
 } from "@mui/icons-material";
 import { CONTACT_WHATSAPP_URL } from "@/lib/contact";
+import api from "@/services/api";
+
+interface FeaturedProduct {
+  id: string;
+  _id?: string;
+  name: string;
+  image: string;
+  category?: string;
+}
 
 const features = [
   {
@@ -60,14 +71,16 @@ const features = [
   },
 ];
 
-const creations = [
-  { name: "Brownie Tub", image: "/Brownie_tub.jpg", tag: "Best Seller", tagColor: "#f59e0b", id: 1 },
-  { name: "Rasmalai Truffle", image: "/Rasmalai_Truffle.jpg", tag: "New Arrival", tagColor: "#10b981", id: 2 },
-  { name: "Jim Jam Cookie", image: "/Jim_Jam_Cookies.jpg", tag: "Popular", tagColor: "#3b82f6", id: 3 },
-  { name: "Blueberry Truffle", image: "/Blueberry_Truffle.jpg", tag: "Premium", tagColor: "#8b5cf6", id: 4 },
-  { name: "Dark Choc Brownie", image: "/Dark_Chocolate_walnut_brownie.jpg", tag: "Favourite", tagColor: "#ec4899", id: 5 },
-  { name: "Cranberry Blondie", image: "/Cranberry_pistachio_blondie.jpg", tag: "Seasonal", tagColor: "#ef4444", id: 6 },
-];
+// Tags for featured products by name
+const FEATURED_TAGS: Record<string, { tag: string; tagColor: string }> = {
+  "Brownie Tub": { tag: "Best Seller", tagColor: "#f59e0b" },
+  "Rasmalai Truffle": { tag: "New Arrival", tagColor: "#10b981" },
+  "Jim Jam Cookies": { tag: "Popular", tagColor: "#3b82f6" },
+  "Blueberry Truffle": { tag: "Premium", tagColor: "#8b5cf6" },
+  "Dark Chocolate Walnut Brownie": { tag: "Favourite", tagColor: "#ec4899" },
+  "Cranberry Pistachio Blondie": { tag: "Seasonal", tagColor: "#ef4444" },
+};
+const FEATURED_NAMES = Object.keys(FEATURED_TAGS);
 
 const testimonials = [
   {
@@ -105,6 +118,21 @@ const stats = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const [featured, setFeatured] = useState<FeaturedProduct[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+
+  useEffect(() => {
+    api.get("/products").then((res) => {
+      const products: FeaturedProduct[] = res.data.products || [];
+      // Pick featured products by name from API (which have real Cloudinary URLs)
+      const picked = FEATURED_NAMES.map((name) =>
+        products.find((p) => p.name === name)
+      ).filter((p): p is FeaturedProduct => !!p);
+      setFeatured(picked);
+    }).catch(() => {
+      // fallback: no featured products shown
+    }).finally(() => setFeaturedLoading(false));
+  }, []);
 
   return (
     <Box>
@@ -363,82 +391,95 @@ export default function Home() {
           </Box>
 
           <Grid container spacing={{ xs: 2, md: 3 }}>
-            {creations.map(({ name, image, tag, tagColor, id }, i) => (
-              <Grid item xs={6} sm={4} md={4} key={i}>
-                <Card
-                  onClick={() => navigate(`/products/${id}`)}
-                  sx={{
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
-                    bgcolor: "white",
-                    transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
-                    cursor: "pointer",
-                    "&:hover": {
-                      transform: "translateY(-10px) scale(1.02)",
-                      boxShadow: "0 28px 60px rgba(190,24,93,0.18)",
-                      "& .card-img": { transform: "scale(1.1)" },
-                      "& .card-overlay": { opacity: 1 },
-                    },
-                  }}
-                >
-                  <Box sx={{ position: "relative", height: { xs: 170, md: 230 }, overflow: "hidden" }}>
-                    <Box
-                      className="card-img"
-                      sx={{ transition: "transform 0.6s ease", height: "100%", position: "relative" }}
-                    >
-                      <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </Box>
-                    {/* Hover overlay */}
-                    <Box
-                      className="card-overlay"
-                      sx={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%)",
-                        opacity: 0,
-                        transition: "opacity 0.4s ease",
-                        display: "flex",
-                        alignItems: "flex-end",
-                        p: 2,
-                      }}
-                    >
-                      <Typography variant="body2" color="white" fontWeight={600} fontSize="0.85rem">
-                        Tap to order →
-                      </Typography>
-                    </Box>
-                    {/* Tag */}
-                    <Chip
-                      label={tag}
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: 10,
-                        left: 10,
-                        bgcolor: tagColor,
-                        color: "white",
-                        fontWeight: 800,
-                        fontSize: "0.68rem",
-                        height: 22,
-                        borderRadius: "6px",
-                        boxShadow: `0 4px 12px ${alpha(tagColor, 0.4)}`,
-                      }}
-                    />
-                  </Box>
-                  <CardContent sx={{ py: 2, px: 2.5 }}>
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight={700}
-                      textAlign="center"
-                      sx={{ fontSize: { xs: "0.85rem", md: "0.95rem" } }}
-                    >
-                      {name}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {featuredLoading
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <Grid item xs={6} sm={4} md={4} key={i}>
+                    <Skeleton variant="rounded" height={280} sx={{ borderRadius: 4 }} />
+                  </Grid>
+                ))
+              : featured.map((product, i) => {
+                  const tagInfo = FEATURED_TAGS[product.name] || { tag: "Featured", tagColor: "#6366f1" };
+                  return (
+                    <Grid item xs={6} sm={4} md={4} key={product.id || i}>
+                      <Card
+                        onClick={() => navigate(`/products/${product.id || product._id}`)}
+                        sx={{
+                          borderRadius: 4,
+                          overflow: "hidden",
+                          boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+                          bgcolor: "white",
+                          transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
+                          cursor: "pointer",
+                          "&:hover": {
+                            transform: "translateY(-10px) scale(1.02)",
+                            boxShadow: "0 28px 60px rgba(190,24,93,0.18)",
+                            "& .card-img": { transform: "scale(1.1)" },
+                            "& .card-overlay": { opacity: 1 },
+                          },
+                        }}
+                      >
+                        <Box sx={{ position: "relative", height: { xs: 170, md: 230 }, overflow: "hidden" }}>
+                          <Box
+                            className="card-img"
+                            sx={{ transition: "transform 0.6s ease", height: "100%", position: "relative" }}
+                          >
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              loading="lazy"
+                            />
+                          </Box>
+                          {/* Hover overlay */}
+                          <Box
+                            className="card-overlay"
+                            sx={{
+                              position: "absolute",
+                              inset: 0,
+                              background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%)",
+                              opacity: 0,
+                              transition: "opacity 0.4s ease",
+                              display: "flex",
+                              alignItems: "flex-end",
+                              p: 2,
+                            }}
+                          >
+                            <Typography variant="body2" color="white" fontWeight={600} fontSize="0.85rem">
+                              Tap to order →
+                            </Typography>
+                          </Box>
+                          {/* Tag */}
+                          <Chip
+                            label={tagInfo.tag}
+                            size="small"
+                            sx={{
+                              position: "absolute",
+                              top: 10,
+                              left: 10,
+                              bgcolor: tagInfo.tagColor,
+                              color: "white",
+                              fontWeight: 800,
+                              fontSize: "0.68rem",
+                              height: 22,
+                              borderRadius: "6px",
+                              boxShadow: `0 4px 12px ${alpha(tagInfo.tagColor, 0.4)}`,
+                            }}
+                          />
+                        </Box>
+                        <CardContent sx={{ py: 2, px: 2.5 }}>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            textAlign="center"
+                            sx={{ fontSize: { xs: "0.85rem", md: "0.95rem" } }}
+                          >
+                            {product.name}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  );
+                })}
           </Grid>
 
           <Box textAlign="center" mt={8}>

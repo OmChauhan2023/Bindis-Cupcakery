@@ -21,6 +21,16 @@ import {
   CircularProgress,
   alpha,
   Alert,
+  Avatar,
+  useTheme,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+  InputBase,
+  IconButton,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -31,10 +41,15 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Logout as LogoutIcon,
+  People as CustomersIcon,
+  Storefront as StorefrontIcon,
+  Search as SearchIcon,
+  Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "@/services/api";
+import AdminDashboardOverview from "./components/AdminDashboardOverview";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "#f59e0b",
@@ -45,6 +60,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminPage() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
@@ -52,6 +69,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -70,16 +88,18 @@ export default function AdminPage() {
     setLoading(true);
     setError("");
     try {
-      const [statsRes, prodRes, ordersRes, reviewsRes] = await Promise.all([
+      const [statsRes, prodRes, ordersRes, reviewsRes, custRes] = await Promise.all([
         api.get("/admin/stats").catch(() => ({ data: { products: 0, orders: 0, customers: 0, revenue: 0 } })),
         api.get("/products").catch(() => ({ data: { products: [] } })),
         api.get("/orders").catch(() => ({ data: { orders: [] } })),
         api.get("/reviews").catch(() => ({ data: { reviews: [] } })),
+        api.get("/admin/customers").catch(() => ({ data: { customers: [] } })),
       ]);
       setStats(statsRes.data);
       setProducts(prodRes.data.products || []);
       setOrders(ordersRes.data.orders || []);
       setReviews(reviewsRes.data.reviews || []);
+      setCustomers(custRes.data.customers || []);
     } catch (err: any) {
       setError("Failed to load some admin data. Ensure you are logged in as admin.");
     } finally {
@@ -90,6 +110,13 @@ export default function AdminPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Auth guard — redirect non-admins to login
+  useEffect(() => {
+    if (!loading && !isAdmin) {
+      navigate("/login");
+    }
+  }, [loading, isAdmin, navigate]);
 
   const handleOpenCreateProduct = () => {
     setEditingProduct(null);
@@ -112,7 +139,8 @@ export default function AdminPage() {
   const handleSaveProduct = async () => {
     try {
       if (editingProduct) {
-        await api.put(`/products/${editingProduct.id}`, productForm);
+        const pid = editingProduct._id || editingProduct.id;
+        await api.put(`/products/${pid}`, productForm);
       } else {
         await api.post("/products", productForm);
       }
@@ -123,7 +151,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteProduct = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
       await api.delete(`/products/${id}`);
@@ -133,7 +161,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleUpdateOrderStatus = async (id: number, status: string) => {
+  const handleUpdateOrderStatus = async (id: string, status: string) => {
     try {
       await api.put(`/orders/${id}`, { status });
       loadData();
@@ -150,139 +178,266 @@ export default function AdminPage() {
     );
   }
 
+  const sidebarItems = [
+    { label: "Dashboard", icon: <DashboardIcon />, count: null },
+    { label: "Products", icon: <ProductsIcon />, count: products.length },
+    { label: "Orders", icon: <OrdersIcon />, count: orders.length },
+    { label: "Reviews", icon: <ReviewsIcon />, count: reviews.length },
+    { label: "Live Sign-Ins", icon: <CustomersIcon />, count: customers.length },
+  ];
+
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#fdfaf7", py: 4 }}>
-      <Box sx={{ maxWidth: 1400, mx: "auto", px: 3 }}>
-        {/* Header */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 4,
-            border: "1px solid",
-            borderColor: alpha("#d4a373", 0.2),
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 2,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: isDark ? "#12121c" : "#f8fafc" }}>
+      {/* Sleek Frosted Left Hand Sidebar */}
+      <Box
+        sx={{
+          width: { xs: 70, md: 240 },
+          flexShrink: 0,
+          bgcolor: isDark ? "#1e1e2d" : "#ffffff",
+          borderRight: "1px solid",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          py: 3,
+          px: { xs: 1, md: 2 },
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          zIndex: 100,
+        }}
+      >
+        {/* Top Logo */}
+        <Box>
+          <Box
+            onClick={() => navigate("/")}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              px: { xs: 0, md: 1 },
+              mb: 3,
+              cursor: "pointer",
+              justifyContent: { xs: "center", md: "flex-start" },
+            }}
+          >
             <Box
               sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 3,
+                width: 36,
+                height: 36,
+                borderRadius: 2.5,
                 background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "1.6rem",
+                fontSize: "1.2rem",
                 color: "white",
+                boxShadow: "0 4px 12px rgba(236, 72, 153, 0.3)",
               }}
             >
               👑
             </Box>
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: "#9d4870" }}>
-                Bindi&apos;s Cupcakery Admin Panel
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {user ? `Logged in as ${user.name} (${user.email})` : "Admin Access"} {isAdmin && "• Administrator"}
-              </Typography>
-            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 900,
+                background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                display: { xs: "none", md: "block" },
+                letterSpacing: -0.5,
+              }}
+            >
+              Bindi&apos;s Bakery
+            </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button variant="outlined" onClick={() => navigate("/")} sx={{ borderRadius: "50px" }}>
-              View Storefront
-            </Button>
-            {user && (
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<LogoutIcon />}
-                onClick={() => { logout(); navigate("/"); }}
-                sx={{ borderRadius: "50px" }}
-              >
-                Logout
-              </Button>
-            )}
-          </Box>
-        </Paper>
 
-        {error && (
-          <Alert severity="warning" sx={{ mb: 3, borderRadius: 3 }}>
-            {error} - Some backend features require admin credentials.
-          </Alert>
-        )}
+          {/* Navigation Links */}
+          <List sx={{ px: 0, gap: 0.5, display: "flex", flexDirection: "column" }}>
+            {sidebarItems.map((item, idx) => {
+              const active = tab === idx;
+              return (
+                <ListItem key={item.label} disablePadding>
+                  <Tooltip title={item.label} placement="right" arrow disableHoverListener={Boolean(window.innerWidth > 900)}>
+                    <ListItemButton
+                      onClick={() => setTab(idx)}
+                      sx={{
+                        borderRadius: 2.5,
+                        py: 1.2,
+                        px: { xs: 1.5, md: 2 },
+                        justifyContent: { xs: "center", md: "flex-start" },
+                        bgcolor: active ? alpha("#ec4899", 0.1) : "transparent",
+                        color: active ? "#ec4899" : isDark ? "#94a3b8" : "#64748b",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          bgcolor: active ? alpha("#ec4899", 0.15) : alpha("#ec4899", 0.05),
+                          color: "#ec4899",
+                        },
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          minWidth: { xs: 0, md: 36 },
+                          color: "inherit",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontWeight: active ? 800 : 600,
+                          fontSize: "0.9rem",
+                          sx: { display: { xs: "none", md: "block" } },
+                        }}
+                      />
+                      {item.count !== null && item.count !== undefined && (
+                        <Chip
+                          label={item.count}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.75rem",
+                            fontWeight: 800,
+                            bgcolor: active ? "#ec4899" : isDark ? alpha("#fff", 0.08) : alpha("#000", 0.06),
+                            color: active ? "#fff" : "inherit",
+                            display: { xs: "none", md: "inline-flex" },
+                          }}
+                        />
+                      )}
+                    </ListItemButton>
+                  </Tooltip>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Box>
 
-        {/* Navigation Tabs */}
-        <Paper elevation={0} sx={{ mb: 4, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            variant="scrollable"
-            scrollButtons="auto"
+        {/* Bottom Sidebar Actions */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<StorefrontIcon />}
+            onClick={() => navigate("/")}
+            fullWidth
             sx={{
-              "& .MuiTab-root": { fontWeight: 700, py: 2, minHeight: 60 },
-              "& .Mui-selected": { color: "#ec4899" },
+              borderRadius: 2.5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 700,
+              borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+              color: isDark ? "#e2e8f0" : "#334155",
+              justifyContent: { xs: "center", md: "flex-start" },
+              "& .MuiButton-startIcon": { mr: { xs: 0, md: 1 } },
+              "& span": { display: { xs: "none", md: "inline" } },
             }}
           >
-            <Tab icon={<DashboardIcon />} iconPosition="start" label="Dashboard" />
-            <Tab icon={<ProductsIcon />} iconPosition="start" label={`Products (${products.length})`} />
-            <Tab icon={<OrdersIcon />} iconPosition="start" label={`Orders (${orders.length})`} />
-            <Tab icon={<ReviewsIcon />} iconPosition="start" label={`Reviews (${reviews.length})`} />
-          </Tabs>
+            <span>Storefront</span>
+          </Button>
+
+          {user && (
+            <Button
+              variant="text"
+              color="error"
+              startIcon={<LogoutIcon />}
+              onClick={() => { logout(); navigate("/"); }}
+              fullWidth
+              sx={{
+                borderRadius: 2.5,
+                py: 1,
+                textTransform: "none",
+                fontWeight: 700,
+                justifyContent: { xs: "center", md: "flex-start" },
+                "& .MuiButton-startIcon": { mr: { xs: 0, md: 1 } },
+                "& span": { display: { xs: "none", md: "inline" } },
+              }}
+            >
+              <span>Logout</span>
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      {/* Main Content Area */}
+      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* Ultra-Slim Executive Top Bar */}
+        <Paper
+          elevation={0}
+          sx={{
+            py: 1.5,
+            px: { xs: 2, md: 4 },
+            bgcolor: isDark ? "#1e1e2d" : "#ffffff",
+            borderBottom: "1px solid",
+            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            position: "sticky",
+            top: 0,
+            zIndex: 90,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 800, color: isDark ? "#f8fafc" : "#1e293b", textTransform: "capitalize" }}>
+            {sidebarItems[tab]?.label || "Dashboard"}
+          </Typography>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Chip
+              label="🟢 Live MongoDB Engine"
+              size="small"
+              sx={{
+                fontWeight: 700,
+                bgcolor: alpha("#10b981", 0.1),
+                color: "#10b981",
+                display: { xs: "none", sm: "inline-flex" },
+                border: "1px solid",
+                borderColor: alpha("#10b981", 0.3),
+              }}
+            />
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Avatar
+                sx={{
+                  width: 36,
+                  height: 36,
+                  bgcolor: "#ec4899",
+                  fontWeight: 800,
+                  fontSize: "0.9rem",
+                  boxShadow: "0 2px 8px rgba(236,72,153,0.3)",
+                }}
+              >
+                {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
+              </Avatar>
+              <Box sx={{ display: { xs: "none", sm: "block" } }}>
+                <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.2, color: isDark ? "#f8fafc" : "#1e293b" }}>
+                  {user?.name || "Admin Access"}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "#ec4899", fontWeight: 700, display: "block", fontSize: "0.7rem" }}>
+                  Store Administrator
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
         </Paper>
 
-        {/* Tab 0: Dashboard */}
-        {tab === 0 && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>TOTAL REVENUE</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800, color: "#10b981", mt: 1 }}>
-                  ₹{stats?.revenue ? stats.revenue.toFixed(0) : "0"}
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>ORDERS</Typography>
-                <Typography variant="h4" color="primary" sx={{ fontWeight: 800, mt: 1 }}>
-                  {stats?.orders || orders.length}
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>PRODUCTS</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800, color: "#8b5cf6", mt: 1 }}>
-                  {stats?.products || products.length}
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>REVIEWS</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800, color: "#f59e0b", mt: 1 }}>
-                  {stats?.reviews || reviews.length}
-                </Typography>
-              </Paper>
-            </Grid>
+        {/* Scrollable Content Container */}
+        <Box sx={{ p: { xs: 2, md: 3.5 }, flexGrow: 1 }}>
+          {error && (
+            <Alert severity="warning" sx={{ mb: 3, borderRadius: 3 }}>
+              {error} - Some backend features require admin credentials.
+            </Alert>
+          )}
 
-            <Grid item xs={12}>
-              <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: "1px solid", borderColor: "divider", mt: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Quick Summary</Typography>
-                <Typography color="text.secondary">
-                  Welcome to your MERN Stack dashboard! All frontend views have been successfully migrated to React + Vite. Manage your products, view customer orders, and moderate reviews using the tabs above.
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        )}
+          {/* Tab 0: Dashboard */}
+          {tab === 0 && (
+            <AdminDashboardOverview
+              stats={stats}
+              orders={orders}
+              products={products}
+              customers={customers}
+            />
+          )}
 
         {/* Tab 1: Products */}
         {tab === 1 && (
@@ -424,6 +579,74 @@ export default function AdminPage() {
             )}
           </Paper>
         )}
+
+        {/* Tab 4: Live Sign-Ins & Customers */}
+        {tab === 4 && (
+          <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: "text.primary" }}>
+                  Live Registered Customers & OAuth Sign-Ins
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Real-time feed from MongoDB Atlas of every customer who has signed in or registered.
+                </Typography>
+              </Box>
+              <Chip
+                label={`Total Accounts: ${customers.length}`}
+                color="primary"
+                sx={{ fontWeight: 700, px: 2, py: 2, borderRadius: 3 }}
+              />
+            </Box>
+            {customers.length === 0 ? (
+              <Typography color="text.secondary" py={4} textAlign="center">No customer accounts found yet.</Typography>
+            ) : (
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: alpha("#8b5cf6", 0.05) }}>
+                    <TableCell sx={{ fontWeight: 700 }}>User / Avatar</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Email & Contact</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Sign-In Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Orders</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Total Spent</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {customers.map((c) => (
+                    <TableRow key={c.id} sx={{ "&:hover": { bgcolor: alpha("#8b5cf6", 0.02) } }}>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                          <Avatar src={c.image} alt={c.name} sx={{ bgcolor: "primary.main", fontWeight: 700 }}>
+                            {c.name ? c.name.charAt(0).toUpperCase() : "U"}
+                          </Avatar>
+                          <Box>
+                            <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
+                            {c.role === "admin" && <Chip label="Admin" size="small" color="secondary" sx={{ height: 20, fontSize: "0.7rem", fontWeight: 700 }} />}
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{c.email}</Typography>
+                        <Typography variant="caption" color="text.secondary">{c.phone || "No phone saved"}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{new Date(c.createdAt).toLocaleDateString()}</Typography>
+                        <Typography variant="caption" color="text.secondary">{new Date(c.createdAt).toLocaleTimeString()}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={`${c.orderCount || 0} orders`} size="small" variant="outlined" sx={{ fontWeight: 700 }} />
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 800, color: "#10b981" }}>
+                        ₹{c.totalSpent || 0}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </Paper>
+        )}
+        </Box>
       </Box>
 
       {/* Product Modal */}

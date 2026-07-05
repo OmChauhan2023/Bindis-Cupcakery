@@ -4,6 +4,7 @@ import User from '../models/User';
 import Product from '../models/Product';
 import { lookupPromo } from '../utils/promo';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from '../services/emailService';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -80,6 +81,26 @@ export const createOrder = async (req: Request, res: Response) => {
       deliveryAddress: `${deliveryAddress}\n— ${orderNote}`,
       items: orderItemsData,
     });
+
+    // Asynchronously send automated email notifications (non-blocking)
+    sendOrderConfirmationEmail(
+      customer.email,
+      customer.name,
+      order._id.toString(),
+      total,
+      orderItemsData.map((it: any) => ({ name: it.name, quantity: it.quantity, price: it.price })),
+      paymentMethod || 'Cash',
+      `${deliveryAddress}\n— ${orderNote}`
+    ).catch((e) => console.error('Email send err:', e));
+
+    sendAdminNewOrderEmail(
+      process.env.ADMIN_EMAIL || 'omchauhan092005@gmail.com',
+      order._id.toString(),
+      customer.name,
+      customer.phone,
+      total,
+      paymentMethod || 'Cash'
+    ).catch((e) => console.error('Admin email err:', e));
 
     return res.status(201).json({
       message: 'Order placed',

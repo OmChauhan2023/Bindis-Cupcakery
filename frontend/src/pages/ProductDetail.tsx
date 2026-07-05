@@ -99,7 +99,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const imageUrl = product.image?.startsWith("/") ? product.image : `/${product.image}`;
+  const imageUrl = product.image?.startsWith("http") ? product.image : (product.image?.startsWith("/") ? product.image : `/${product.image}`);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa" }}>

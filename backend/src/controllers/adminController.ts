@@ -21,6 +21,9 @@ export const getStats = async (req: Request, res: Response) => {
       recentReviews,
       allProducts,
       itemAgg,
+      statusAgg,
+      paymentAgg,
+      monthlyAgg,
     ] = await Promise.all([
       Product.countDocuments(),
       Order.countDocuments(),
@@ -41,6 +44,25 @@ export const getStats = async (req: Request, res: Response) => {
           },
         },
       ]),
+      // Real Order Status Breakdown
+      Order.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ]),
+      // Real Payment Method Breakdown
+      Order.aggregate([
+        { $group: { _id: '$paymentMethod', count: { $sum: 1 }, total: { $sum: '$total' } } }
+      ]),
+      // Real Monthly Revenue Trend
+      Order.aggregate([
+        {
+          $group: {
+            _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+            revenue: { $sum: '$total' },
+            ordersCount: { $sum: 1 }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } }
+      ]),
     ]);
 
     const productMap = new Map(allProducts.map((p) => [p._id.toString(), p]));
@@ -57,13 +79,56 @@ export const getStats = async (req: Request, res: Response) => {
       .slice(0, 5);
 
     const catCounts: Record<string, number> = {};
+    const catRevenueMap: Record<string, { revenue: number; units: number }> = {};
     allProducts.forEach((p) => {
       const c = p.category || categoryFor(p.name);
       catCounts[c] = (catCounts[c] || 0) + 1;
+      if (!catRevenueMap[c]) catRevenueMap[c] = { revenue: 0, units: 0 };
     });
+
+    itemAgg.forEach((agg: any) => {
+      const p = productMap.get(agg._id.toString());
+      if (p) {
+        const c = p.category || categoryFor(p.name);
+        if (!catRevenueMap[c]) catRevenueMap[c] = { revenue: 0, units: 0 };
+        catRevenueMap[c].revenue += agg.revenue || 0;
+        catRevenueMap[c].units += agg.units || 0;
+      }
+    });
+
     const categoryBreakdown = Object.entries(catCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
+
+    const categoryRevenue = Object.entries(catRevenueMap)
+      .map(([name, data]) => ({ name, revenue: data.revenue, units: data.units }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    const statusBreakdown: Record<string, number> = {
+      pending: 0,
+      confirmed: 0,
+      preparing: 0,
+      delivered: 0,
+      cancelled: 0,
+    };
+    statusAgg.forEach((s: any) => {
+      if (s._id) statusBreakdown[s._id] = s.count;
+    });
+
+    const paymentBreakdown = paymentAgg.map((p: any) => ({
+      method: p._id || 'COD',
+      count: p.count,
+      total: p.total || 0,
+    }));
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthlyRevenue = monthlyAgg.map((m: any) => ({
+      month: `${monthNames[(m._id.month || 1) - 1]} ${m._id.year || ''}`.trim(),
+      monthIndex: m._id.month,
+      year: m._id.year,
+      revenue: m.revenue || 0,
+      orders: m.ordersCount || 0,
+    }));
 
     return res.json({
       products,
@@ -72,6 +137,10 @@ export const getStats = async (req: Request, res: Response) => {
       reviews: reviewsCount,
       revenue: revenueAgg.length > 0 ? revenueAgg[0].total : 0,
       pendingOrders,
+      statusBreakdown,
+      paymentBreakdown,
+      categoryRevenue,
+      monthlyRevenue,
       recentOrders: recentOrders.map((o: any) => ({
         id: o._id,
         customer: o.user?.name || 'Guest',

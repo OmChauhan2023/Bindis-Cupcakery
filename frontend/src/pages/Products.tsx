@@ -34,7 +34,8 @@ import QuickViewModal from "./components/QuickViewModal";
 import api from "@/services/api";
 
 interface Product {
-  id: number;
+  id: string;
+  _id?: string;
   name: string;
   description: string;
   price: number;
@@ -59,14 +60,14 @@ const CATEGORY_META: {
   { key: "Other", label: "Others", image: "/Cranberry_pistachio_blondie.jpg", emoji: "✨", description: "More sweet creations" },
 ];
 
-// Products marked as bestsellers (first 3 by id)
-const BESTSELLER_IDS = [1, 2, 3];
+// Products marked as bestsellers (by name, since MongoDB uses string ObjectIds)
+const BESTSELLER_NAMES = new Set(["Brownie Tub", "Rasmalai Truffle", "Signature Cupcake"]);
 
 export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [wishlist, setWishlist] = useState<Set<number>>(new Set());
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "name">("featured");
@@ -89,7 +90,7 @@ export default function ProductPage() {
     fetchProducts();
   }, []);
 
-  const toggleWishlist = (id: number) => {
+  const toggleWishlist = (id: string) => {
     setWishlist((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -515,9 +516,9 @@ export default function ProductPage() {
                     </Grid>
                   ))
                   : filteredProducts.map((product, index) => {
-                    const imageUrl = product.image?.startsWith("/") ? product.image : `/${product.image}`;
+                    const imageUrl = product.image?.startsWith("http") ? product.image : (product.image?.startsWith("/") ? product.image : `/${product.image}`);
                     const isWishlisted = wishlist.has(product.id);
-                    const isBestseller = BESTSELLER_IDS.includes(product.id);
+                    const isBestseller = BESTSELLER_NAMES.has(product.name);
                     const openQuickView = () => setActiveProduct(product);
 
                     return (

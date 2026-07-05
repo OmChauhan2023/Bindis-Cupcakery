@@ -142,7 +142,11 @@ export default function CartDrawer({ open, onClose }: Props) {
           <Box sx={{ flex: 1, overflowY: "auto", px: 2, py: 2 }}>
             <Stack spacing={1.5}>
               {cart.map((item) => {
-                const imgSrc = item.image?.startsWith("/") ? item.image : `/${item.image}`;
+                const imgSrc = item.image?.startsWith("http")
+                  ? item.image
+                  : item.image?.startsWith("/")
+                  ? item.image
+                  : `/${item.image}`;
                 return (
                   <Box
                     key={item.cartKey}
@@ -167,12 +171,27 @@ export default function CartDrawer({ open, onClose }: Props) {
                         borderRadius: 2,
                         overflow: "hidden",
                         flexShrink: 0,
+                        bgcolor: "#fdf2f8",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
                       <img
                         src={imgSrc}
                         alt={item.name}
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                          const parent = (e.target as HTMLImageElement).parentElement;
+                          if (parent && !parent.querySelector(".img-fallback")) {
+                            const fb = document.createElement("div");
+                            fb.className = "img-fallback";
+                            fb.style.cssText = "font-size:1.8rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%";
+                            fb.textContent = "🧁";
+                            parent.appendChild(fb);
+                          }
+                        }}
                       />
                     </Box>
 

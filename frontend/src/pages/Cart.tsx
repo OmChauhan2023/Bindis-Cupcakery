@@ -154,10 +154,37 @@ const CartPage = () => {
                           overflow: "hidden",
                           position: "relative",
                           boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+                          bgcolor: "#fdf2f8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img
+                          src={
+                            item.image?.startsWith("http")
+                              ? item.image
+                              : item.image?.startsWith("/")
+                              ? item.image
+                              : `/${item.image}`
+                          }
+                          alt={item.name}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(e) => {
+                            // Fallback: hide broken img and show emoji placeholder
+                            (e.target as HTMLImageElement).style.display = "none";
+                            const parent = (e.target as HTMLImageElement).parentElement;
+                            if (parent && !parent.querySelector(".img-fallback")) {
+                              const fb = document.createElement("div");
+                              fb.className = "img-fallback";
+                              fb.style.cssText = "font-size:2.5rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%";
+                              fb.textContent = "🧁";
+                              parent.appendChild(fb);
+                            }
+                          }}
+                        />
                       </Box>
+
 
                       {/* Info + customizations */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>

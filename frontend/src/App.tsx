@@ -19,6 +19,7 @@ import Gallery from "./pages/Gallery";
 import Reviews from "./pages/Reviews";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -37,7 +38,7 @@ export default function App() {
                 <Route path="/cart/checkout" element={<Checkout />} />
                 <Route path="/cart/confirmation" element={<Confirmation />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/profile" element={<Login />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/review" element={<Reviews />} />

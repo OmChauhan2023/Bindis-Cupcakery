@@ -1,16 +1,40 @@
-import { PhoneIcon as WhatsappIcon } from "lucide-react";
+import { Box } from "@mui/material";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { CONTACT_WHATSAPP_URL } from "@/lib/contact";
 
 export default function WhatsAppFloat() {
   return (
-    <a
+    <Box
+      component="a"
       href={CONTACT_WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="fixed bottom-16 right-16 z-50 p-4 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 hover:scale-110 transition-all duration-300 animate-bounce"
+      sx={{
+        position: "fixed",
+        bottom: 28,
+        right: 28,
+        zIndex: 9999,
+        width: 60,
+        height: 60,
+        borderRadius: "50%",
+        bgcolor: "#25D366", // Official WhatsApp green
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 8px 24px rgba(37, 211, 102, 0.4)",
+        cursor: "pointer",
+        transition: "all 0.25s ease",
+        "&:hover": {
+          bgcolor: "#20bd5a",
+          transform: "scale(1.06)",
+          boxShadow: "0 12px 30px rgba(37, 211, 102, 0.55)",
+        },
+        textDecoration: "none",
+      }}
     >
-      <WhatsappIcon size={32} />
-    </a>
+      <WhatsAppIcon sx={{ fontSize: 36 }} />
+    </Box>
   );
 }

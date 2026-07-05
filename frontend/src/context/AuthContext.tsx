@@ -2,10 +2,12 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import api from '@/services/api';
 
 export interface User {
-  id: number;
+  id: string;
+  _id?: string;
   name: string;
   email: string;
   phone?: string;
+  address?: string;
   role?: string;
 }
 
@@ -14,6 +16,8 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password?: string) => Promise<void>;
   register: (name: string, email: string, phone?: string, password?: string) => Promise<void>;
+  googleLogin: (email: string, name: string, image?: string, googleId?: string) => Promise<void>;
+  updateUser: (userData: { name?: string; phone?: string; address?: string }) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
 }
@@ -63,6 +67,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(data.user || data);
   };
 
+  const googleLogin = async (email: string, name: string, image?: string, googleId?: string) => {
+    const { data } = await api.post('/auth/google', { email, name, image, googleId });
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
+    setUser(data.user || data);
+  };
+
+  const updateUser = async (userData: { name?: string; phone?: string; address?: string }) => {
+    const { data } = await api.put('/auth/me', userData);
+    setUser(data.user || data);
+  };
+
   const logout = async () => {
     try {
       await api.post('/auth/logout');
@@ -76,11 +93,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, googleLogin, updateUser, logout, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
