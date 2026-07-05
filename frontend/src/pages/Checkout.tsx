@@ -1,5 +1,6 @@
 import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -40,6 +41,7 @@ import api from "@/services/api";
 
 const CheckoutPage = () => {
   const { cart, clearCart, promo } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [userDetails, setUserDetails] = useState({
@@ -49,6 +51,18 @@ const CheckoutPage = () => {
     address: "",
     paymentMethod: "UPI",
   });
+
+  useEffect(() => {
+    if (user) {
+      setUserDetails((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phone || "",
+        address: prev.address || user.address || "",
+      }));
+    }
+  }, [user]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
@@ -165,11 +179,21 @@ const CheckoutPage = () => {
           <Grid item xs={12} md={7}>
             {/* Customer Details */}
             <Paper elevation={0} sx={{ borderRadius: 4, border: "1px solid", borderColor: "divider", p: 4, mb: 3 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: alpha("#ec4899", 0.1), display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <PersonIcon sx={{ color: "primary.main", fontSize: 20 }} />
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3, flexWrap: "wrap", gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: alpha("#ec4899", 0.1), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <PersonIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                  </Box>
+                  <Typography variant="h6" fontWeight={700}>Customer Details</Typography>
                 </Box>
-                <Typography variant="h6" fontWeight={700}>Customer Details</Typography>
+                {user && (
+                  <Chip
+                    icon={<VerifiedIcon sx={{ fontSize: 16, color: "#10b981 !important" }} />}
+                    label="Auto-filled from Login"
+                    sx={{ bgcolor: alpha("#10b981", 0.1), color: "#065f46", fontWeight: 700, borderRadius: 2 }}
+                    size="small"
+                  />
+                )}
               </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -180,7 +204,7 @@ const CheckoutPage = () => {
                     value={userDetails.name}
                     onChange={handleChange}
                     error={!!errors.name}
-                    helperText={errors.name}
+                    helperText={errors.name || (user?.name ? "✨ Pre-filled from your Google / Account profile" : "")}
                     variant="outlined"
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                   />
@@ -193,8 +217,9 @@ const CheckoutPage = () => {
                     type="email"
                     value={userDetails.email}
                     onChange={handleChange}
+                    disabled={!!user?.email}
                     error={!!errors.email}
-                    helperText={errors.email}
+                    helperText={errors.email || (user?.email ? "✨ Linked to your logged-in account (read-only)" : "")}
                     variant="outlined"
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                   />
@@ -208,7 +233,7 @@ const CheckoutPage = () => {
                     value={userDetails.phone}
                     onChange={handleChange}
                     error={!!errors.phone}
-                    helperText={errors.phone}
+                    helperText={errors.phone || (user?.phone ? "✨ Pre-filled from profile (editable)" : "")}
                     variant="outlined"
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                   />
@@ -221,7 +246,7 @@ const CheckoutPage = () => {
                     value={userDetails.address}
                     onChange={handleChange}
                     error={!!errors.address}
-                    helperText={errors.address}
+                    helperText={errors.address || (user?.address ? "✨ Pre-filled from profile (editable)" : "")}
                     multiline
                     rows={2}
                     variant="outlined"

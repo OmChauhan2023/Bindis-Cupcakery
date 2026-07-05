@@ -32,77 +32,157 @@ export const sendOrderConfirmationEmail = async (
   try {
     const transporter = createTransporter();
     
+    const getFoodEmoji = (name: string) => {
+      const lower = name.toLowerCase();
+      if (lower.includes('brownie')) return '🍫';
+      if (lower.includes('truffle')) return '🍬';
+      if (lower.includes('cake') && !lower.includes('cup')) return '🎂';
+      if (lower.includes('cookie') || lower.includes('biscoff')) return '🍪';
+      if (lower.includes('box') || lower.includes('combo')) return '🎁';
+      return '🧁';
+    };
+
     const itemsHtml = items
       .map(
         (item) => `
         <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; font-weight: 600;">${item.name}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; color: #64748b; text-align: center;">${item.quantity}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; color: #10b981; font-weight: bold; text-align: right;">₹${item.price * item.quantity}</td>
+          <td style="padding: 14px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b; font-weight: 700; font-size: 15px;">
+            <span style="font-size: 18px; margin-right: 8px;">${getFoodEmoji(item.name)}</span> ${item.name}
+          </td>
+          <td style="padding: 14px 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; text-align: center; font-weight: 600;">
+            <span style="background: #f1f5f9; padding: 4px 10px; border-radius: 12px; font-size: 13px;">x${item.quantity}</span>
+          </td>
+          <td style="padding: 14px 12px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 800; text-align: right; font-size: 15px;">
+            ₹${item.price * item.quantity}
+          </td>
         </tr>
       `
       )
       .join('');
 
     const htmlContent = `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); padding: 32px 20px; text-align: center; color: white;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;">🧁 Bindi's Cupcakery</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">Artisanal Freshly Baked Happiness</p>
-        </div>
-
-        <!-- Body -->
-        <div style="padding: 32px 24px;">
-          <h2 style="color: #0f172a; margin-top: 0; font-size: 22px;">Order Confirmed! 🎉</h2>
-          <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-            Hi <strong>${userName}</strong>,<br/>
-            Thank you for ordering from Bindi's Cupcakery! We have received your order and our kitchen is already preparing your fresh artisanal bakes with love.
-          </p>
-
-          <!-- Order Badge -->
-          <div style="background-color: #f8fafc; border-left: 4px solid #ec4899; padding: 16px; border-radius: 8px; margin: 24px 0;">
-            <p style="margin: 0; font-size: 14px; color: #64748b; text-transform: uppercase; font-weight: bold;">Order Reference</p>
-            <p style="margin: 4px 0 0 0; font-size: 18px; font-family: monospace; font-weight: bold; color: #1e293b;">#${orderId}</p>
-            <p style="margin: 8px 0 0 0; font-size: 14px; color: #10b981; font-weight: 600;">🔒 Payment Method: ${paymentMethod}</p>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #f1f5f9; box-shadow: 0 20px 40px rgba(0,0,0,0.08);">
+        
+        <!-- Luxury Burgundy Velvet Header -->
+        <div style="background: linear-gradient(135deg, #4c0519 0%, #831843 50%, #9d174d 100%); padding: 40px 24px; text-align: center; color: white; position: relative;">
+          <div style="display: inline-block; background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.25);">
+            ✨ Surat's Premier Eggless Bakery
           </div>
-
-          <!-- Items Table -->
-          <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 12px;">Order Summary</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-            <thead>
-              <tr style="background-color: #f1f5f9; text-align: left;">
-                <th style="padding: 10px; color: #475569; font-size: 14px;">Item</th>
-                <th style="padding: 10px; color: #475569; font-size: 14px; text-align: center;">Qty</th>
-                <th style="padding: 10px; color: #475569; font-size: 14px; text-align: right;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="2" style="padding: 16px 10px 0 10px; font-weight: bold; color: #0f172a; text-align: right; font-size: 18px;">Total Amount Paid:</td>
-                <td style="padding: 16px 10px 0 10px; font-weight: 900; color: #ec4899; text-align: right; font-size: 20px;">₹${total}</td>
-              </tr>
-            </tfoot>
-          </table>
-
-          <!-- Delivery Info -->
-          <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
-            <p style="margin: 0; font-size: 14px; color: #166534; font-weight: bold;">📍 Delivery Details:</p>
-            <p style="margin: 4px 0 0 0; font-size: 14px; color: #15803d; white-space: pre-line;">${deliveryAddress}</p>
-          </div>
-
-          <p style="color: #64748b; font-size: 14px; text-align: center; margin-bottom: 0;">
-            Need help or custom dietary requests? Reply directly to this email or chat with us on WhatsApp! 💕
+          <h1 style="margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -0.5px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            Bindi's Cupcakery
+          </h1>
+          <p style="margin: 8px 0 0 0; font-size: 15px; color: #fbcfe8; font-weight: 500;">
+            Handcrafted with Artisanal Love & Premium Ingredients 🧁
           </p>
         </div>
 
-        <!-- Footer -->
-        <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px;">
-          <p style="margin: 0;">© 2026 Bindi's Cupcakery. All rights reserved.</p>
-          <p style="margin: 4px 0 0 0;">Freshly baked in Surat with artisanal love & care.</p>
+        <!-- Celebratory Banner -->
+        <div style="background: linear-gradient(90deg, #fdf2f8 0%, #fce7f3 100%); padding: 18px 24px; border-bottom: 1px solid #fbcfe8; text-align: center;">
+          <p style="margin: 0; color: #9d174d; font-weight: 800; font-size: 16px;">
+            🎉 Order Successfully Confirmed & Sent to Kitchen!
+          </p>
+        </div>
+
+        <!-- Body Content -->
+        <div style="padding: 36px 28px;">
+          <h2 style="color: #0f172a; margin-top: 0; font-size: 22px; font-weight: 800;">
+            Hello, ${userName}! 👋
+          </h2>
+          <p style="color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+            Thank you for ordering from <strong>Bindi's Cupcakery</strong>! We have received your order and our master chefs in our Surat kitchen are already measuring out fresh cocoa, rich cream, and love to handcraft your treats! 💕
+          </p>
+
+          <!-- Status & Time Progress Card -->
+          <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 28px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+              <div>
+                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; display: block;">Order Number</span>
+                <span style="font-size: 20px; font-family: monospace; font-weight: 900; color: #831843;">#${orderId.slice(-8).toUpperCase()}</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; display: block;">Payment Status</span>
+                <span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; display: inline-block; margin-top: 2px;">
+                  ✅ Paid (${paymentMethod})
+                </span>
+              </div>
+            </div>
+
+            <!-- Estimated Delivery Box -->
+            <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 14px; text-align: center;">
+              <p style="margin: 0; font-size: 14px; color: #334155; font-weight: 700;">
+                ⏱️ Estimated Preparation & Delivery Time:
+              </p>
+              <p style="margin: 4px 0 0 0; font-size: 18px; color: #ec4899; font-weight: 900;">
+                30 – 45 Minutes 🛵
+              </p>
+              <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">
+                Freshly baked to order • Packed in temperature-controlled luxury boxes
+              </p>
+            </div>
+          </div>
+
+          <!-- Order Summary Table -->
+          <h3 style="color: #0f172a; font-size: 18px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            🛍️ Your Delicious Order Summary
+          </h3>
+          <div style="border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; margin-bottom: 28px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #f8fafc; text-align: left; border-bottom: 2px solid #e2e8f0;">
+                  <th style="padding: 12px; color: #475569; font-size: 13px; font-weight: 700; text-transform: uppercase;">Item Description</th>
+                  <th style="padding: 12px; color: #475569; font-size: 13px; font-weight: 700; text-transform: uppercase; text-align: center;">Qty</th>
+                  <th style="padding: 12px; color: #475569; font-size: 13px; font-weight: 700; text-transform: uppercase; text-align: right;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+              <tfoot>
+                <tr style="background-color: #fdf2f8;">
+                  <td colspan="2" style="padding: 18px 12px; font-weight: 800; color: #831843; text-align: right; font-size: 16px;">
+                    Grand Total Paid:
+                  </td>
+                  <td style="padding: 18px 12px; font-weight: 900; color: #be185d; text-align: right; font-size: 22px;">
+                    ₹${total}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Delivery Address Box -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac; padding: 20px; border-radius: 16px; margin-bottom: 28px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="font-size: 24px;">📍</span>
+              <div>
+                <p style="margin: 0; font-size: 13px; color: #166534; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
+                  Delivery / Pickup Location
+                </p>
+                <p style="margin: 6px 0 0 0; font-size: 15px; color: #14532d; font-weight: 600; white-space: pre-line; line-height: 1.5;">
+                  ${deliveryAddress}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Support Footer Box -->
+          <div style="text-align: center; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 14px; color: #334155; font-weight: 700;">
+              Have a custom dietary request or need delivery updates? 💬
+            </p>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #64748b;">
+              Our Surat kitchen team is here for you! You can simply reply to this official confirmation email or reach us on WhatsApp at <strong>+91 98765 43210</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Elegant Footer -->
+        <div style="background-color: #0f172a; padding: 28px 20px; text-align: center; color: #94a3b8; font-size: 13px;">
+          <p style="margin: 0; color: #ffffff; font-weight: 700; font-size: 15px;">🧁 Bindi's Cupcakery Surat</p>
+          <p style="margin: 6px 0 12px 0; color: #cbd5e1; font-size: 12px;">Parle Point, Surat, Gujarat 395007 • 100% Eggless Artisanal Bakery</p>
+          <div style="border-top: 1px solid #334155; padding-top: 14px; margin-top: 14px; color: #64748b; font-size: 11px;">
+            <p style="margin: 0;">© 2026 Bindi's Cupcakery. All rights reserved. Made with ❤️ for sweet lovers.</p>
+          </div>
         </div>
       </div>
     `;
@@ -162,7 +242,7 @@ export const sendAdminNewOrderEmail = async (
           <p><strong>Order ID:</strong> #${orderId}</p>
           <p><strong>Total Amount:</strong> ₹${total}</p>
           <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-          <p>Go to <a href="http://localhost:5173/admin">Admin Dashboard</a> to manage kitchen status!</p>
+          <p>Go to <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/admin">Admin Dashboard</a> to manage kitchen status!</p>
         </div>
       `,
     });

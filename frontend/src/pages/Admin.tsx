@@ -442,13 +442,23 @@ export default function AdminPage() {
         {/* Tab 1: Products */}
         {tab === 1 && (
           <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: "1px solid", borderColor: "divider" }}>
-            <Box sx={{ display: "flex", justify: "space-between", mb: 3, alignItems: "center" }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3, alignItems: "center", flexWrap: "wrap", gap: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>Manage Catalog Items</Typography>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={handleOpenCreateProduct}
-                sx={{ borderRadius: "50px", background: "linear-gradient(135deg, #ec4899, #8b5cf6)" }}
+                sx={{
+                  borderRadius: "50px",
+                  px: 3,
+                  py: 1,
+                  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+                  boxShadow: "0 4px 14px rgba(236, 72, 153, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #db2777, #7c3aed)",
+                    boxShadow: "0 6px 18px rgba(236, 72, 153, 0.4)",
+                  },
+                }}
               >
                 Add Product
               </Button>

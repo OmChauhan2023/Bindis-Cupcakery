@@ -95,7 +95,7 @@ export default function LoginPage() {
         console.error("Google OAuth Error:", err);
         const errMsg = err.response?.data?.message || err.message || "Google OAuth verification failed.";
         if (errMsg.includes("Network Error") || errMsg.includes("refused") || errMsg.includes("Failed to fetch")) {
-          setError("Cannot connect to backend server (localhost:5000). Please ensure your backend terminal is running!");
+          setError("Cannot connect to backend server. Please ensure the backend API is online and accessible!");
         } else {
           setError(`Google Login failed: ${errMsg}`);
         }
