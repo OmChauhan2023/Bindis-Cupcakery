@@ -16,7 +16,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password?: string) => Promise<void>;
   register: (name: string, email: string, phone?: string, password?: string) => Promise<void>;
-  googleLogin: (email: string, name: string, image?: string, googleId?: string) => Promise<void>;
+  googleLogin: (email?: string, name?: string, image?: string, googleId?: string, credential?: string) => Promise<void>;
   updateUser: (userData: { name?: string; phone?: string; address?: string }) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
@@ -67,8 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(data.user || data);
   };
 
-  const googleLogin = async (email: string, name: string, image?: string, googleId?: string) => {
-    const { data } = await api.post('/auth/google', { email, name, image, googleId });
+  const googleLogin = async (email?: string, name?: string, image?: string, googleId?: string, credential?: string) => {
+    const { data } = await api.post('/auth/google', { email, name, image, googleId, credential });
     if (data.token) {
       localStorage.setItem('token', data.token);
     }

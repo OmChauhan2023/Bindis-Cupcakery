@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin, GoogleLogin } from "@react-oauth/google";
 import {
   Box,
   Button,
@@ -224,33 +224,65 @@ export default function LoginPage() {
           </Typography>
 
           {/* Option 1: One-Click Google Login (The Friction-Free Choice) */}
-          <Button
-            onClick={handleGoogleClick}
-            fullWidth
-            variant="outlined"
-            size="large"
-            disabled={loading}
-            startIcon={<GoogleIcon sx={{ color: "#DB4437", fontSize: 22 }} />}
-            sx={{
-              borderRadius: "50px",
-              py: 1.4,
-              mb: 3,
-              fontWeight: 700,
-              fontSize: "0.95rem",
-              borderColor: alpha("#000", 0.2),
-              color: "text.primary",
-              bgcolor: alpha("#000", 0.01),
-              "&:hover": {
-                borderColor: "#000",
-                bgcolor: alpha("#000", 0.04),
-                transform: "translateY(-1px)",
-              },
-              transition: "all 0.2s",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            }}
-          >
-            Continue with Google
-          </Button>
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+          import.meta.env.VITE_GOOGLE_CLIENT_ID !== "demo_google_client_id" &&
+          import.meta.env.VITE_GOOGLE_CLIENT_ID.includes(".apps.googleusercontent.com") ? (
+            <Box sx={{ mb: 3, display: "flex", justifyContent: "center" }}>
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    setLoading(true);
+                    setError("");
+                    try {
+                      await googleLogin(undefined, undefined, undefined, undefined, credentialResponse.credential);
+                      navigate(from, { replace: true });
+                    } catch (err: any) {
+                      console.error("Google Auth Error:", err);
+                      setError(err.response?.data?.message || "Google authentication failed.");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }
+                }}
+                onError={() => {
+                  setError("Google Sign-In failed. Please try again.");
+                }}
+                useOneTap
+                theme="outline"
+                shape="pill"
+                size="large"
+                width="340"
+              />
+            </Box>
+          ) : (
+            <Button
+              onClick={handleGoogleClick}
+              fullWidth
+              variant="outlined"
+              size="large"
+              disabled={loading}
+              startIcon={<GoogleIcon sx={{ color: "#DB4437", fontSize: 22 }} />}
+              sx={{
+                borderRadius: "50px",
+                py: 1.4,
+                mb: 3,
+                fontWeight: 700,
+                fontSize: "0.95rem",
+                borderColor: alpha("#000", 0.2),
+                color: "text.primary",
+                bgcolor: alpha("#000", 0.01),
+                "&:hover": {
+                  borderColor: "#000",
+                  bgcolor: alpha("#000", 0.04),
+                  transform: "translateY(-1px)",
+                },
+                transition: "all 0.2s",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              }}
+            >
+              Continue with Google (Demo)
+            </Button>
+          )}
 
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <Divider sx={{ flex: 1 }} />
