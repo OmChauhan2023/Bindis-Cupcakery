@@ -6,21 +6,28 @@ if (typeof dns.setDefaultResultOrder === 'function') {
   dns.setDefaultResultOrder('ipv4first');
 }
 
-// Create nodemailer transporter from environment variables
+// Create nodemailer transporter using port 587 (STARTTLS), IPv4 family, and explicit timeouts to prevent cloud firewall blocks
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     return null;
   }
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: Number(process.env.EMAIL_PORT) || 587,
-    secure: process.env.EMAIL_SECURE === 'true',
+    secure: process.env.EMAIL_SECURE === 'true', // false for port 587 (STARTTLS)
+    requireTLS: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-  });
+    tls: {
+      rejectUnauthorized: false,
+    },
+    family: 4, // Force IPv4 sockets (bypasses Render IPv6 network absence)
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+  } as any);
 };
 
 /**
@@ -237,7 +244,7 @@ export const sendAdminNewOrderEmail = async (
       return true;
     }
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Bindi's Cupcakery Bot" <${process.env.EMAIL_USER}>`,
       to: adminEmail || 'omchauhan092005@gmail.com',
       subject: `🚨 NEW ORDER ALERT! #${orderId.slice(-6).toUpperCase()} - ₹${total} (${paymentMethod})`,
@@ -252,6 +259,7 @@ export const sendAdminNewOrderEmail = async (
         </div>
       `,
     });
+    console.log(`📧 Live admin alert email sent to ${adminEmail || 'omchauhan092005@gmail.com'}: ${info.messageId}`);
     return true;
   } catch (err) {
     console.error('❌ Error sending admin alert email:', err);
@@ -276,7 +284,7 @@ export const sendContactMessageEmail = async (
       return true;
     }
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Bindi's Cupcakery Bot" <${process.env.EMAIL_USER}>`,
       to: adminEmail,
       replyTo: email,
@@ -292,6 +300,7 @@ export const sendContactMessageEmail = async (
         </div>
       `,
     });
+    console.log(`📧 Live contact message email sent to ${adminEmail}: ${info.messageId}`);
     return true;
   } catch (err) {
     console.error('❌ Error sending contact message email:', err);
