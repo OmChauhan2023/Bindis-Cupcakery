@@ -44,6 +44,79 @@ const createTransporter = () => {
 };
 
 /**
+ * Universal helper to send email via Brevo HTTPS REST API (Port 443) or fall back to Nodemailer SMTP
+ */
+const sendEmailHelper = async ({
+  to,
+  subject,
+  html,
+  replyTo,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+}): Promise<boolean> => {
+  const senderEmail = process.env.EMAIL_USER || 'omchauhan092005@gmail.com';
+  const senderName = "Bindi's Cupcakery Bot";
+
+  // 1. Try Brevo HTTPS REST API first (Port 443 - zero firewall blocking on Render)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: to }],
+          subject: subject,
+          htmlContent: html,
+          ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Brevo API Error (${response.status}): ${errorData}`);
+      }
+
+      const data: any = await response.json();
+      console.log(`📧 [BREVO HTTPS API] Successfully sent email to ${to} (MessageID: ${data?.messageId || 'ok'})`);
+      return true;
+    } catch (apiErr: any) {
+      console.error(`❌ [BREVO API FAILED]:`, apiErr.message || apiErr);
+      // Fallback to Nodemailer if Brevo fails
+    }
+  }
+
+  // 2. Fallback to Nodemailer SMTP
+  const transporter = createTransporter();
+  if (!transporter) {
+    console.log(`👑 [SIMULATED EMAIL] To: ${to} | Subject: ${subject}`);
+    return true;
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"${senderName}" <${senderEmail}>`,
+      to,
+      subject,
+      html,
+      ...(replyTo ? { replyTo } : {}),
+    });
+    console.log(`📧 [NODEMAILER SMTP] Sent email to ${to}: ${info.messageId}`);
+    return true;
+  } catch (smtpErr: any) {
+    console.error(`❌ [NODEMAILER SMTP FAILED]:`, smtpErr.message || smtpErr);
+    return false;
+  }
+};
+
+/**
  * Send automated order confirmation receipt email to the customer
  */
 export const sendOrderConfirmationEmail = async (
@@ -213,26 +286,11 @@ export const sendOrderConfirmationEmail = async (
       </div>
     `;
 
-    if (!transporter) {
-      // Simulate email delivery in console if SMTP info is not set in .env
-      console.log('========================================================================');
-      console.log(`📧 [SIMULATED EMAIL SERVICE] Order Confirmation Sent to: ${userEmail}`);
-      console.log(`🏷️  Subject: Order Confirmed! #${orderId} - Bindi's Cupcakery`);
-      console.log(`💰 Total: ₹${total} | Payment: ${paymentMethod}`);
-      console.log('💡 Tip: To send live emails, set EMAIL_USER and EMAIL_PASS in backend/.env');
-      console.log('========================================================================');
-      return true;
-    }
-
-    const info = await transporter.sendMail({
-      from: `"Bindi's Cupcakery" <${process.env.EMAIL_USER}>`,
+    return await sendEmailHelper({
       to: userEmail,
       subject: `Order Confirmed! #${orderId.slice(-6).toUpperCase()} - Bindi's Cupcakery 🧁`,
       html: htmlContent,
     });
-
-    console.log(`📧 Live email sent to ${userEmail}: ${info.messageId}`);
-    return true;
   } catch (error) {
     console.error('❌ Error sending order confirmation email:', error);
     return false;
@@ -251,14 +309,7 @@ export const sendAdminNewOrderEmail = async (
   paymentMethod: string
 ) => {
   try {
-    const transporter = createTransporter();
-    if (!transporter) {
-      console.log(`👑 [SIMULATED ADMIN ALERT] New Order #${orderId} by ${customerName} (₹${total}) via ${paymentMethod}`);
-      return true;
-    }
-
-    const info = await transporter.sendMail({
-      from: `"Bindi's Cupcakery Bot" <${process.env.EMAIL_USER}>`,
+    return await sendEmailHelper({
       to: adminEmail || 'omchauhan092005@gmail.com',
       subject: `🚨 NEW ORDER ALERT! #${orderId.slice(-6).toUpperCase()} - ₹${total} (${paymentMethod})`,
       html: `
@@ -272,8 +323,6 @@ export const sendAdminNewOrderEmail = async (
         </div>
       `,
     });
-    console.log(`📧 Live admin alert email sent to ${adminEmail || 'omchauhan092005@gmail.com'}: ${info.messageId}`);
-    return true;
   } catch (err) {
     console.error('❌ Error sending admin alert email:', err);
     return false;
@@ -289,19 +338,11 @@ export const sendContactMessageEmail = async (
   message: string
 ) => {
   try {
-    const transporter = createTransporter();
     const adminEmail = process.env.ADMIN_EMAIL || 'omchauhan092005@gmail.com';
-    
-    if (!transporter) {
-      console.log(`👑 [SIMULATED CONTACT MESSAGE] from ${name} (${email}): ${message}`);
-      return true;
-    }
-
-    const info = await transporter.sendMail({
-      from: `"Bindi's Cupcakery Bot" <${process.env.EMAIL_USER}>`,
+    return await sendEmailHelper({
       to: adminEmail,
-      replyTo: email,
       subject: `✉️ New Contact Message from ${name}`,
+      replyTo: email,
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 2px solid #8b5cf6; border-radius: 12px;">
           <h2 style="color: #8b5cf6;">✉️ New Contact Form Submission</h2>
@@ -313,8 +354,6 @@ export const sendContactMessageEmail = async (
         </div>
       `,
     });
-    console.log(`📧 Live contact message email sent to ${adminEmail}: ${info.messageId}`);
-    return true;
   } catch (err) {
     console.error('❌ Error sending contact message email:', err);
     return false;
