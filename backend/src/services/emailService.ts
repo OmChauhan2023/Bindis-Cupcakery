@@ -57,7 +57,7 @@ const sendEmailHelper = async ({
   html: string;
   replyTo?: string;
 }): Promise<boolean> => {
-  const senderEmail = process.env.EMAIL_USER || 'omchauhan092005@gmail.com';
+  const senderEmail = process.env.EMAIL_USER || 'bindiscupcakery@gmail.com';
   const senderName = "Bindi's Cupcakery Bot";
 
   // 1. Try Brevo HTTPS REST API first (Port 443 - zero firewall blocking on Render)
@@ -310,7 +310,7 @@ export const sendAdminNewOrderEmail = async (
 ) => {
   try {
     return await sendEmailHelper({
-      to: adminEmail || 'omchauhan092005@gmail.com',
+      to: adminEmail || 'bindiscupcakery@gmail.com',
       subject: `🚨 NEW ORDER ALERT! #${orderId.slice(-6).toUpperCase()} - ₹${total} (${paymentMethod})`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 2px solid #ec4899; border-radius: 12px;">
@@ -338,7 +338,7 @@ export const sendContactMessageEmail = async (
   message: string
 ) => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'omchauhan092005@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'bindiscupcakery@gmail.com';
     return await sendEmailHelper({
       to: adminEmail,
       subject: `✉️ New Contact Message from ${name}`,

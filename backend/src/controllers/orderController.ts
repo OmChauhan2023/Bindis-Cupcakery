@@ -94,7 +94,7 @@ export const createOrder = async (req: Request, res: Response) => {
     ).catch((e) => console.error('Email send err:', e));
 
     sendAdminNewOrderEmail(
-      process.env.ADMIN_EMAIL || 'omchauhan092005@gmail.com',
+      process.env.ADMIN_EMAIL || 'bindiscupcakery@gmail.com',
       order._id.toString(),
       customer.name,
       customer.phone,
