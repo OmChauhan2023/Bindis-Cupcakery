@@ -12,6 +12,7 @@ import uploadRoutes from './routes/uploadRoutes';
 import chatRoutes from './routes/chatRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import connectDB from './config/db';
+import { sendContactMessageEmail } from './services/emailService';
 
 dotenv.config();
 
@@ -51,6 +52,19 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chat', chatRoutes);
+
+// Contact Route
+app.post('/api/contact', async (req: Request, res: Response) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    return res.status(400).json({ message: 'Name, email, and message are required.' });
+  }
+  
+  sendContactMessageEmail(name, email, message)
+    .catch((err) => console.error('Failed to send contact email:', err));
+
+  return res.status(200).json({ message: 'Message sent successfully.' });
+});
 
 // Health Check
 app.get('/api/health', (req: Request, res: Response) => {

@@ -10,6 +10,9 @@ import {
   Link as MuiLink,
   alpha,
   Stack,
+  Alert,
+  Collapse,
+  CircularProgress,
 } from "@mui/material";
 import {
   LocationOn as MapPinIcon,
@@ -20,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL, CONTACT_WHATSAPP_URL } from "@/lib/contact";
+import api from "@/services/api";
 
 const contactItems = [
   {
@@ -49,11 +53,26 @@ const contactItems = [
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Thank you for your message! We will get back to you soon.");
-    setFormData({ name: "", email: "", message: "" });
+    setLoading(true);
+    setSuccess(false);
+    setError("");
+    try {
+      await api.post("/contact", formData);
+      setSuccess(true);
+      setFormData({ name: "", email: "", message: "" });
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err: any) {
+      console.error("Contact Form Submit Error:", err);
+      setError(err.response?.data?.message || err.message || "Failed to send message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -253,11 +272,23 @@ export default function Contact() {
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       sx={{ "& .MuiFilledInput-root": { bgcolor: "#f8fafc", borderRadius: 3 } }}
                     />
+                    <Collapse in={success}>
+                      <Alert severity="success" sx={{ borderRadius: 2 }}>
+                        ✨ Thank you! Your message was sent successfully. We will reply to your email soon.
+                      </Alert>
+                    </Collapse>
+                    <Collapse in={!!error}>
+                      <Alert severity="error" sx={{ borderRadius: 2 }}>
+                        {error}
+                      </Alert>
+                    </Collapse>
+
                     <Button
                       type="submit"
                       variant="contained"
                       size="large"
-                      endIcon={<SendIcon />}
+                      disabled={loading}
+                      endIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
                       sx={{
                         py: 2,
                         borderRadius: 4,
@@ -272,12 +303,12 @@ export default function Contact() {
                         },
                       }}
                     >
-                      Send Message
+                      {loading ? "Sending..." : "Send Message"}
                     </Button>
                     <Typography variant="body2" color="text.secondary" textAlign="center">
                       Or email us directly at{" "}
-                      <MuiLink href="mailto:info@bindiscupcakery.com" fontWeight={700} color="primary">
-                        info@bindiscupcakery.com
+                      <MuiLink href="mailto:bindiscupcakery@gmail.com" fontWeight={700} color="primary">
+                        bindiscupcakery@gmail.com
                       </MuiLink>
                     </Typography>
                   </Stack>

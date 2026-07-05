@@ -1,4 +1,10 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+
+// Force Node to prioritize IPv4 over IPv6 when resolving SMTP servers to prevent ENETUNREACH on Render's network
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 // Create nodemailer transporter from environment variables
 const createTransporter = () => {
@@ -249,6 +255,46 @@ export const sendAdminNewOrderEmail = async (
     return true;
   } catch (err) {
     console.error('❌ Error sending admin alert email:', err);
+    return false;
+  }
+};
+
+/**
+ * Send contact form submission email to the admin
+ */
+export const sendContactMessageEmail = async (
+  name: string,
+  email: string,
+  message: string
+) => {
+  try {
+    const transporter = createTransporter();
+    const adminEmail = process.env.ADMIN_EMAIL || 'omchauhan092005@gmail.com';
+    
+    if (!transporter) {
+      console.log(`👑 [SIMULATED CONTACT MESSAGE] from ${name} (${email}): ${message}`);
+      return true;
+    }
+
+    await transporter.sendMail({
+      from: `"Bindi's Cupcakery Bot" <${process.env.EMAIL_USER}>`,
+      to: adminEmail,
+      replyTo: email,
+      subject: `✉️ New Contact Message from ${name}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 2px solid #8b5cf6; border-radius: 12px;">
+          <h2 style="color: #8b5cf6;">✉️ New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p style="margin-top: 15px; padding: 10px; background-color: #f3f4f6; border-radius: 6px; font-style: italic;">
+            "${message}"
+          </p>
+        </div>
+      `,
+    });
+    return true;
+  } catch (err) {
+    console.error('❌ Error sending contact message email:', err);
     return false;
   }
 };

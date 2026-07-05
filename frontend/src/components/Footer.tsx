@@ -154,11 +154,11 @@ export function Footer() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Mail sx={{ color: "#be185d", fontSize: 20, flexShrink: 0 }} />
                 <MuiLink
-                  href="mailto:info@bindiscupcakery.com"
+                  href="mailto:bindiscupcakery@gmail.com"
                   color="text.secondary"
                   sx={{ fontSize: "0.875rem", textDecoration: "none", "&:hover": { color: "primary.main" } }}
                 >
-                  info@bindiscupcakery.com
+                  bindiscupcakery@gmail.com
                 </MuiLink>
               </Box>
             </Box>
