@@ -1,228 +1,221 @@
-# Bindi's Cupcakery
+# 🧁 Bindi's Cupcakery
 
-A full-stack e-commerce web app for **Bindi's Cupcakery** — a Surat-based bakery selling cupcakes, cakes, desserts, and gift boxes. Built with Next.js 15, Prisma, SQLite, and Material UI.
+<div align="center">
+
+AI-powered, full-stack e-commerce platform for Bindi's Cupcakery
+
+![Google Winter Of Code](https://img.shields.io/badge/Google%20Winter%20Of%20Code-2025-4285F4?logo=google&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?logoColor=white)
+![React](https://img.shields.io/badge/React-18.0+-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22.0+-339933?logo=nodedotjs&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.0+-000000?logo=express&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)
+
+</div>
 
 ---
 
-## Tech Stack
+## 🏆 Google Winter Of Code 2025
+This high performance full stack e commerce architecture was proudly conceptualized and developed for Google Winter Of Code 2025. The initiative focuses on bridging traditional artisanal commerce with next generation cloud computing and generative artificial intelligence. By integrating Google Gemini 2.5 Flash for automated customer consultation and Google Identity Services for frictionless authentication, Bindi's Cupcakery demonstrates how modern web standards can transform local bakery operations in Surat into scalable enterprise deployments.
+
+---
+
+## ✨ Comprehensive Feature Suite
+
+### 🤖 Live AI Bakery Consultant
+The floating chat widget is powered by Google Gemini 2.5 Flash with a custom system prompt covering the full product catalog, Surat local business details, Parle Point delivery windows, and box discount logic. A lightweight local NLP engine provides silent fallback coverage so customers always receive an instant intelligent response even if cloud AI services are temporarily offline.
+
+### 🔐 Google OAuth Authentication
+Seamless one click sign in powered by Google Identity Services. Upon authentication, user sessions are securely managed with JSON Web Tokens stored in HTTP only cookies and local storage, ensuring customers remain logged in across browser sessions while automatically syncing their profile information.
+
+### 🛒 Smart Shopping Cart and Customization
+An intelligent cart system that treats unique product customizations as distinct line items. Customers can customize flavours, frosting, box sizes, and gift messages. The cart dynamically calculates subtotal discounts from promotional codes like BINDI10 and automatically applies free delivery thresholds for orders above 500 Rupees.
+
+### 💳 Intelligent Checkout and Instant Payments
+Zero friction checkout architecture that automatically retrieves and pre populates customer names, email addresses, phone numbers, and delivery locations from their saved profile. Supports modern Indian payment workflows including instant online UPI, Google Pay, and Cash on Delivery with immediate payment recognition and order verification.
+
+### 📬 Luxury Designer Email Receipts
+Every confirmed order triggers an automated high end HTML email receipt sent directly to the customer inbox via Nodemailer and Google Workspace SMTP. Receipts feature order reference numbers, verified payment status badges, itemized product tables with smart emoji food recognition, estimated kitchen preparation timers of 30 to 45 minutes, location pins, and direct WhatsApp support links.
+
+### 🔔 Real Time Admin Notifications
+Simultaneously with customer receipts, the system fires an instant priority email alert directly to the bakery owner inbox. This alert includes customer contact details, exact order monetary totals, payment methods, and a one click direct link to the kitchen management panel for immediate order processing.
+
+### 👑 Enterprise Admin Management Dashboard
+A dedicated protected control panel for bakery management. Administrators can perform live catalog operations including adding new products with instant Cloudinary image uploads, editing prices and descriptions, managing inventory availability, tracking active kitchen orders, inspecting customer directories, and moderating public product reviews.
+
+### 📊 Live Business Analytics and Statistics
+Real time financial and operational intelligence integrated directly into the admin dashboard. Computes live total revenue, order volume counts, registered customer growth, and category distribution. Includes interactive progress bars highlighting top selling bakery items by units sold to drive data informed baking schedules.
+
+### 📱 Persistent WhatsApp Kitchen Support
+A sleek floating WhatsApp communication button available across every page of the application. Customers can initiate direct chat conversations with the Surat kitchen help desk for custom wedding cake inquiries, urgent delivery modifications, or live order assistance.
+
+---
+
+## 🔒 Enterprise Security and Best Practices
+
+### Role Based Access Control and Authentication
+Server side middleware strictly enforces administrator privileges by validating JSON Web Tokens on every protected API route. Customer passwords and sensitive account credentials are securely hashed using bcrypt encryption before database persistence.
+
+### Server Side Price and Order Verification
+To eliminate client side price manipulation risks, the backend independently verifies all item prices against database records and recomputes total checkout amounts on the server during order placement. Fake promotional codes or modified discounts submitted from the browser are silently rejected.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 (App Router + Turbopack) |
+| Framework | React 18 with Vite |
 | Language | TypeScript |
-| UI Library | Material UI (MUI) v5 |
-| Animations | Framer Motion |
-| ORM | Prisma 7 |
-| Database | SQLite (via `@prisma/adapter-better-sqlite3`) |
-| Auth | JWT (`jsonwebtoken` + `bcryptjs`) stored in cookie |
-| Package Manager | npm |
+| UI Library | Material UI v5 |
+| Routing | React Router v6 |
+| Authentication | Google OAuth 2.0 via @react-oauth/google |
+| HTTP Client | Axios |
 
----
+### Backend
 
-## Pages
-
-### Public
-
-| Route | Description |
+| Layer | Technology |
 |---|---|
-| `/` | Landing page — hero, featured products, testimonials, about snippet |
-| `/products` | Full product catalog with search, category filter, sort, and grid/list toggle. Clicking any product opens a Quick View modal. |
-| `/cart` | Shopping cart — line items with customization chips, quantity controls, promo code field, delivery fee logic, order summary |
-| `/cart/checkout` | Checkout form — customer details, payment method selector, live order summary with promo + delivery breakdown |
-| `/cart/confirmation` | Post-order confirmation page |
-| `/review` | Public review form — product dropdown, star rating, comment; shows all published reviews |
-| `/gallery` | Photo gallery with hero section and image grid |
-| `/contact` | Contact page with WhatsApp link, phone, and location |
-
-### Admin (protected)
-
-| Route | Description |
-|---|---|
-| `/admin/login` | Admin login — JWT cookie set on success |
-| `/admin/dashboard` | Live dashboard — stat cards (orders, revenue, customers, products), recent orders, recent reviews, top products by units sold, catalog breakdown by category, quick-action buttons |
-| `/admin/products` | Product management — add, edit, delete products |
-| `/admin/orders` | Order management — view all orders with status |
-| `/admin/customers` | Customer list pulled from DB |
-| `/admin/reviews` | Review moderation — approve / delete |
-
-Admin pages are wrapped by `AdminShell` which guards against unauthenticated access by reading the `adminToken` cookie client-side, and all admin API routes verify the JWT server-side.
+| Runtime | Node.js 22 |
+| Framework | Express.js |
+| Language | TypeScript |
+| Database | MongoDB Atlas via Mongoose |
+| AI Engine | Google Gemini 2.5 Flash |
+| Email | Nodemailer via Gmail SMTP |
+| Image Storage | Cloudinary |
+| Auth | JSON Web Token and Google ID Token verification |
 
 ---
 
-## API Routes
-
-| Method | Route | Description |
-|---|---|---|
-| GET | `/api/products` | List all products (auto-seeds 18 on first request) |
-| POST | `/api/products` | Create product |
-| PUT | `/api/products/[id]` | Update product |
-| DELETE | `/api/products/[id]` | Delete product |
-| POST | `/api/orders` | Place order — validates products server-side, applies promo, persists Order + OrderItems |
-| GET | `/api/reviews` | List all reviews |
-| POST | `/api/reviews` | Submit a review (find-or-create user by email) |
-| GET | `/api/users` | List users |
-| POST | `/api/register` | Create initial admin account |
-| POST | `/api/admin/login` | Admin login — verifies bcrypt hash, returns JWT cookie |
-| POST | `/api/admin/logout` | Clears admin cookie |
-| GET | `/api/admin/stats` | Aggregate stats: counts, revenue, pending orders, recent activity, top products, category breakdown |
-| GET | `/api/admin/orders` | List all orders |
-| PATCH | `/api/admin/orders/[id]` | Update order status |
-| GET | `/api/admin/reviews` | List reviews for moderation |
-| PATCH | `/api/admin/reviews/[id]` | Approve / delete review |
-| GET | `/api/admin/customers` | List all customers |
-
----
-
-## Key Features
-
-### Product Catalog
-- 18 products across 5 categories: Cupcakes, Cakes, Desserts, Gift Boxes, Seasonal
-- Auto-seeded from `src/lib/seed.ts` on first API request — no manual migration needed
-- Quick View modal per product: image, description, ingredients, allergens, shelf life, story, per-category customization options (flavour, frosting, size, colour, message, etc.)
-
-### Cart & Checkout
-- `CartContext` tracks items by `cartKey` (product ID + customizations fingerprint) so different customizations of the same product are separate line items
-- Promo codes validated client-side in `CartContext` and server-side in `/api/orders` — fake codes passed directly to the API are silently rejected
-- Active promo codes: `BINDI10` (10% off), `FIRST10` (10% off first order)
-- Delivery fee: ₹40 under ₹500 subtotal, free at ₹500+
-- Full breakdown (subtotal → promo discount → delivery → total) shown on both cart and checkout pages
-
-### Order Pipeline
-- `POST /api/orders` find-or-creates a User by email, recomputes server-side total, persists Order and OrderItems (with customization notes)
-- Order total can never be manipulated by a client-side price override — server caps line unit price to the DB price range
-
-### Reviews
-- Public form lets customers submit star ratings and comments with product association
-- Reviews stored in DB, shown live on the `/review` page after submit
-- Admin can approve or delete via `/admin/reviews`
-
-### Admin Dashboard (live)
-- All stats fetched from `/api/admin/stats` at page load — no static mock data
-- Recent Orders feed, Recent Reviews feed, Top 5 Products by units sold with progress bars, Catalog Breakdown table
-
-### Contact / WhatsApp
-- All phone numbers centralized in `src/lib/contact.ts` — one change updates every page
-- Current number: +91 99989-86977
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-src/
-├── app/
-│   ├── admin/
-│   │   ├── components/AdminShell.tsx   # Sidebar layout + auth guard
-│   │   ├── dashboard/page.tsx
-│   │   ├── login/page.tsx
-│   │   ├── orders/page.tsx
-│   │   ├── products/page.tsx
-│   │   ├── customers/page.tsx
-│   │   └── reviews/page.tsx
-│   ├── api/
-│   │   ├── admin/
-│   │   │   ├── customers/route.ts
-│   │   │   ├── login/route.ts
-│   │   │   ├── logout/route.ts
-│   │   │   ├── orders/route.ts
-│   │   │   ├── orders/[id]/route.ts
-│   │   │   ├── reviews/route.ts
-│   │   │   ├── reviews/[id]/route.ts
-│   │   │   └── stats/route.ts
-│   │   ├── orders/route.ts
-│   │   ├── products/route.ts
-│   │   ├── products/[id]/route.ts
-│   │   ├── register/route.ts
-│   │   ├── reviews/route.ts
-│   │   └── users/route.ts
-│   ├── cart/
-│   │   ├── components/
-│   │   │   ├── CartContext.tsx
-│   │   │   ├── CartPage.tsx
-│   │   │   └── CheckOut.tsx
-│   │   ├── checkout/page.tsx
-│   │   └── confirmation/page.tsx
-│   ├── contact/page.tsx
-│   ├── gallery/page.tsx
-│   ├── products/
-│   │   ├── components/QuickViewModal.tsx
-│   │   └── page.tsx
-│   ├── review/page.tsx
-│   └── page.tsx                        # Home / landing
-├── components/
-│   └── LayoutShell.tsx                 # Suppresses Header/Footer on /admin/* routes
-├── lib/
-│   ├── auth.ts                         # verifyAdmin() JWT helper
-│   ├── categories.ts                   # categoryFor() — pure, no DB import
-│   ├── contact.ts                      # Centralized phone/WhatsApp constants
-│   ├── prisma.ts                       # Prisma client singleton
-│   ├── productDetails.ts               # Per-product details + customization schema
-│   ├── promo.ts                        # PROMOS array + lookupPromo() (client + server)
-│   └── seed.ts                         # ensureSeeded() — 18 products on first request
-prisma/
-└── schema.prisma
+Bindis Cupcakery
+├── frontend
+│   └── src
+│       ├── components
+│       │   ├── AiChatWidget.tsx
+│       │   ├── Navbar.tsx
+│       │   ├── Footer.tsx
+│       │   └── whatsapp-float.tsx
+│       ├── context
+│       │   └── AuthContext.tsx
+│       ├── pages
+│       │   ├── Home.tsx
+│       │   ├── Products.tsx
+│       │   ├── Cart.tsx
+│       │   ├── Checkout.tsx
+│       │   ├── Login.tsx
+│       │   └── Admin.tsx
+│       └── services
+│           └── api.ts
+└── backend
+    └── src
+        ├── controllers
+        │   ├── authController.ts
+        │   ├── productController.ts
+        │   ├── orderController.ts
+        │   └── chatController.ts
+        ├── models
+        ├── routes
+        ├── services
+        │   └── emailService.ts
+        └── index.ts
 ```
 
 ---
 
-## Getting Started
+## 🚀 Local Development
 
 ### Prerequisites
-- Node.js 18+
-- npm 9+
+- Node.js 18 or higher
+- npm 9 or higher
+- MongoDB Atlas account
+- Google Cloud Console project with OAuth 2.0 credentials
+- Google AI Studio API key
 
-### Setup
-
+### 1. Clone the repository
 ```bash
-# 1. Clone and install
-git clone <repo-url>
-cd "Bindis Cupcakery"
+git clone https://github.com/OmChauhan2023/Bindis-Cupcakery.git
+```
+
+### 2. Backend setup
+```bash
+cd backend
 npm install
+```
 
-# 2. Push the schema to SQLite (creates bindis.db automatically)
-npx prisma db push
+Create backend .env file:
+```env
+PORT=5000
+JWT_SECRET=your_strong_random_secret_here
+MONGODB_URI=your_mongodb_atlas_connection_string
+CLIENT_URL=http://localhost:5173
+GOOGLE_CLIENT_ID=your_google_client_id
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+GEMINI_API_KEY=your_gemini_api_key
+EMAIL_USER=bindiscupcakery@gmail.com
+EMAIL_PASS=your_16_char_google_app_password
+ADMIN_EMAIL=your_personal_email@gmail.com
+```
 
-# 3. Create the admin account
-npx prisma studio
-# or run a seed script / use the /api/register endpoint once
+### 3. Frontend setup
+```bash
+cd frontend
+npm install
+```
 
-# 4. Start the dev server
+Create frontend .env file:
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+### 4. Run both servers
+
+Backend:
+```bash
+cd backend
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-DATABASE_URL="file:./bindis.db"
-JWT_SECRET="your-secret-key-here"
-```
-
-### Admin Credentials (default)
-
-| Field | Value |
-|---|---|
-| Username | admin |
-| Password | admin123 |
-
-Login at [http://localhost:3000/admin/login](http://localhost:3000/admin/login).
-
----
-
-## Available Scripts
-
+Frontend:
 ```bash
-npm run dev      # Dev server (Turbopack)
-npm run build    # Production build
-npm run start    # Production server
-npm run lint     # ESLint
-npx prisma studio   # DB GUI
-npx prisma db push  # Apply schema changes
+cd frontend
+npm run dev
+```
+
+Open http://localhost:5173 in your browser.
+
+---
+
+## 🌱 Available Scripts
+
+### Backend
+```bash
+npm run dev
+npm run build
+npm start
+npm run seed
+```
+
+### Frontend
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
 ```
 
 ---
 
-*Made with love for Bindi's Cupcakery, Surat*
+Made with ❤️ for Bindi's Cupcakery, Surat, Gujarat
+
+© 2026 Bindi's Cupcakery. Made in Surat with artisanal love and care.
