@@ -1,18 +1,22 @@
-# 🧁 Bindi's Cupcakery
-
 <div align="center">
 
-AI-powered, full-stack e-commerce platform for Bindi's Cupcakery
+# 🧁 Bindi's Cupcakery
+### Surat's Premier Eggless Artisanal Bakery & AI E-Commerce Platform
 
-![Google Winter Of Code](https://img.shields.io/badge/Google%20Winter%20Of%20Code-2025-4285F4?logo=google&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?logoColor=white)
-![React](https://img.shields.io/badge/React-18.0+-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-22.0+-339933?logo=nodedotjs&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
-![Express](https://img.shields.io/badge/Express-4.0+-000000?logo=express&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)
+[![Google Winter Of Code](https://img.shields.io/badge/Google%20Winter%20Of%20Code-2025-4285F4?logo=google&logoColor=white)](#)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-18.0+-61DAFB?logo=react&logoColor=white)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](#)
+[![Node.js](https://img.shields.io/badge/Node.js-22.0+-339933?logo=nodedotjs&logoColor=white)](#)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](#)
+[![Express](https://img.shields.io/badge/Express-4.0+-000000?logo=express&logoColor=white)](#)
+[![Google Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)](#)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](#)
+
+<p align="center">
+  <b>High-performance full-stack e-commerce architecture conceptualized & developed for Google Winter of Code 2025.</b><br>
+  Featuring Google Gemini 2.5 Flash AI consultation, live Brevo transactional email receipts, and instant UPI checkout.
+</p>
 
 </div>
 
